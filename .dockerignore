@@ -1,0 +1,32 @@
+# Dependencies
+go.mod
+go.sum
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Config
+config.toml
+
+# Temporary
+tmp/
+temp/
+
+# Build
+*.exe
+*.exe~
+server
+dancer-server.exe
+
+# Test
+*.test
+coverage.out
