@@ -9,11 +9,11 @@ endpoints = ["http://localhost:2379"]
 # password = ""
 
 [jwt]
-secret = "your--secret-key-here-change-in-production"
+secret = "your-secret-key-here-change-in-production"
 expiry = 86400
 
 [logger]
-level = "info"
+level = "debug"
 file_path = "logs/dancer.log"
 max_size = 100
 max_backup = 7

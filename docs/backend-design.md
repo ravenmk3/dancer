@@ -46,12 +46,14 @@ dancer/
 │   ├── handlers/                   # HTTP 处理器
 │   │   ├── base.go                # 基础响应结构
 │   │   ├── user.go                # 用户管理处理器
-│   │   └── dns.go                 # DNS 记录处理器
+│   │   ├── dns.go                 # DNS 记录处理器
+│   │   └── health.go              # 健康检查处理器
 │   ├── services/                   # 业务逻辑层
 │   │   ├── user_service.go        # 用户业务逻辑
 │   │   └── dns_service.go         # DNS 业务逻辑
 │   └── router/                     # 路由配置
-│       └── router.go              # Echo 路由定义
+│       ├── router.go              # Echo 路由定义
+│       └── logger.go              # 自定义访问日志中间件
 ├── assets/                         # 前端构建产物 (Go embed)
 ├── config.toml                     # 配置文件
 ├── go.mod
@@ -87,9 +89,13 @@ type Config struct {
     } `toml:"app"`
 
     Etcd struct {
-        Endpoints []string `toml:"endpoints"`
-        Username  string   `toml:"username"`
-        Password  string   `toml:"password"`
+        Endpoints            []string `toml:"endpoints"`
+        Username             string   `toml:"username"`
+        Password             string   `toml:"password"`
+        ReconnectInterval    int      `toml:"reconnect_interval"`
+        MaxReconnectInterval int      `toml:"max_reconnect_interval"`
+        HealthCheckInterval  int      `toml:"health_check_interval"`
+        DialTimeout          int      `toml:"dial_timeout"`
     } `toml:"etcd"`
 
     JWT struct {
@@ -142,7 +148,8 @@ type DNSRecord struct {
 
 ## 4. API 路由设计
 
-```
+GET/POST /api/health                # 健康检查
+
 POST   /api/auth/login              # 用户登录
 POST   /api/auth/refresh            # 刷新 Token
 
@@ -183,6 +190,36 @@ CoreDNS 使用按域名层级组织的 key 格式：
 - `api.github.com` → `/coredns/com/github/api/`
 - 多个 A 记录: `/coredns/com/github/x1`, `/coredns/com/github/x2` ...
 
+## 5.1 etcd 客户端自动重连
+
+### 连接状态管理
+
+```
+┌─────────────────────────────────────────────────────┐
+│                 EtcdClientManager                    │
+├─────────────────────────────────────────────────────┤
+│  状态: disconnected / connecting / connected          │
+│  后台 goroutine 自动重连                              │
+│  健康检查定时器                                       │
+└─────────────────────────────────────────────────────┘
+```
+
+### 重连策略
+
+- **首次连接**: 异步尝试连接，失败则后台重试
+- **断线检测**: 每 30 秒健康检查一次
+- **指数退避**: 5s → 10s → 20s → 30s (上限)
+- **等待超时**: 存储操作默认等待 5 秒
+
+### 配置项
+
+| 配置项 | 默认值 | 说明 |
+|--------|--------|------|
+| `reconnect_interval` | 5 | 初始重连间隔(秒) |
+| `max_reconnect_interval` | 30 | 最大重连间隔(秒) |
+| `health_check_interval` | 30 | 健康检查间隔(秒) |
+| `dial_timeout` | 5 | 连接超时(秒) |
+
 ## 6. 认证授权
 
 - JWT (HS256 算法)
@@ -194,6 +231,8 @@ CoreDNS 使用按域名层级组织的 key 格式：
 - 库: logrus + lumberjack
 - 控制台: 彩色输出 (开发环境)
 - 文件: 支持轮转 (max_size, max_backup, max_age)
+- 访问日志: 自定义中间件 (DEBUG 级别)
+  - 格式: `DEBU[2026-02-03 23:26:42] 127.0.0.1 | GET /api/health | 200 | 0ms | 0B/43B`
 
 ## 8. 配置文件 (config.toml)
 
@@ -207,6 +246,10 @@ env = "development"
 endpoints = ["http://localhost:2379"]
 # username = ""
 # password = ""
+# reconnect_interval = 5          # 初始重连间隔(秒)
+# max_reconnect_interval = 30     # 最大重连间隔(秒)
+# health_check_interval = 30      # 健康检查间隔(秒)
+# dial_timeout = 5               # 连接超时(秒)
 
 [jwt]
 secret = "your-256-bit-secret"
@@ -224,12 +267,18 @@ max_age = 7
 
 ```go
 var (
-    ErrUserNotFound       = errors.New("user not found")
-    ErrUserExists         = errors.New("user already exists")
-    ErrInvalidCredentials = errors.New("invalid username or password")
-    ErrWrongPassword      = errors.New("wrong password")
-    ErrRecordNotFound     = errors.New("DNS record not found")
-    ErrRecordExists       = errors.New("DNS record already exists")
+    ErrUserNotFound        = errors.New("user not found")
+    ErrUserExists          = errors.New("user already exists")
+    ErrInvalidCredentials  = errors.New("invalid username or password")
+    ErrWrongPassword       = errors.New("wrong password")
+    ErrRecordNotFound      = errors.New("DNS record not found")
+    ErrRecordExists        = errors.New("DNS record already exists")
+    ErrInvalidToken        = errors.New("invalid token")
+    ErrTokenExpired        = errors.New("token expired")
+    ErrUnauthorized        = errors.New("unauthorized")
+    ErrForbidden           = errors.New("forbidden")
+    ErrInvalidInput        = errors.New("invalid input")
+    ErrEtcdUnavailable     = errors.New("etcd service temporarily unavailable")
 )
 ```
 
@@ -247,12 +296,14 @@ Storage (etcd CRUD)
 
 ## 11. 关键实现文件
 
-1. `internal/storage/etcd/client.go` - etcd 客户端封装
+1. `internal/storage/etcd/client.go` - etcd 客户端封装（支持自动重连）
 2. `internal/auth/middleware.go` - JWT 认证中间件
 3. `internal/models/dto.go` - 请求/响应数据结构
 4. `internal/services/user_service.go` - 用户业务逻辑
 5. `internal/errors/errors.go` - 错误定义
-6. `cmd/server/main.go` - 程序入口
+6. `internal/handlers/health.go` - 健康检查处理器
+7. `internal/router/logger.go` - 自定义访问日志中间件
+8. `cmd/server/main.go` - 程序入口
 
 ## 12. 错误响应格式
 

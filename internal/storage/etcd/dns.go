@@ -23,6 +23,14 @@ func NewDNSStorage(client *Client) *DNSStorage {
 	return &DNSStorage{client: client}
 }
 
+// checkConnection 检查 etcd 连接，使用默认超时
+func (s *DNSStorage) checkConnection() error {
+	if err := s.client.WaitForConnection(defaultWaitTimeout); err != nil {
+		return errors.ErrEtcdUnavailable
+	}
+	return nil
+}
+
 // GenerateKey 生成DNS记录的etcd key
 // domain: example.com -> /coredns/com/example/
 // index: x1, x2, x3... 用于同一域名的多个记录
@@ -37,6 +45,10 @@ func (s *DNSStorage) GenerateKey(domain string, index int) string {
 
 // GetRecord 根据key获取DNS记录
 func (s *DNSStorage) GetRecord(ctx context.Context, key string) (*models.DNSRecord, error) {
+	if err := s.checkConnection(); err != nil {
+		return nil, err
+	}
+
 	resp, err := s.client.client.Get(ctx, key)
 	if err != nil {
 		return nil, err
@@ -56,6 +68,10 @@ func (s *DNSStorage) GetRecord(ctx context.Context, key string) (*models.DNSReco
 
 // ListRecords 列出指定域名的所有记录
 func (s *DNSStorage) ListRecords(ctx context.Context, domain string) ([]*models.DNSRecord, error) {
+	if err := s.checkConnection(); err != nil {
+		return nil, err
+	}
+
 	prefix := s.getDomainPrefix(domain)
 	resp, err := s.client.client.Get(ctx, prefix, clientv3.WithPrefix())
 	if err != nil {
@@ -76,6 +92,10 @@ func (s *DNSStorage) ListRecords(ctx context.Context, domain string) ([]*models.
 
 // ListAllRecords 列出所有DNS记录
 func (s *DNSStorage) ListAllRecords(ctx context.Context) ([]*models.DNSRecord, error) {
+	if err := s.checkConnection(); err != nil {
+		return nil, err
+	}
+
 	resp, err := s.client.client.Get(ctx, storage.DNSKeyPrefix, clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
@@ -95,6 +115,10 @@ func (s *DNSStorage) ListAllRecords(ctx context.Context) ([]*models.DNSRecord, e
 
 // CreateRecord 创建DNS记录
 func (s *DNSStorage) CreateRecord(ctx context.Context, record *models.DNSRecord) error {
+	if err := s.checkConnection(); err != nil {
+		return err
+	}
+
 	// 查找该域名的下一个可用索引
 	records, err := s.ListRecords(ctx, record.Domain)
 	if err != nil {
@@ -118,6 +142,10 @@ func (s *DNSStorage) CreateRecord(ctx context.Context, record *models.DNSRecord)
 
 // UpdateRecord 更新DNS记录
 func (s *DNSStorage) UpdateRecord(ctx context.Context, record *models.DNSRecord) error {
+	if err := s.checkConnection(); err != nil {
+		return err
+	}
+
 	// 检查记录是否存在
 	existing, err := s.GetRecord(ctx, record.Key)
 	if err != nil {
@@ -150,6 +178,10 @@ func (s *DNSStorage) UpdateRecord(ctx context.Context, record *models.DNSRecord)
 
 // DeleteRecord 删除DNS记录
 func (s *DNSStorage) DeleteRecord(ctx context.Context, key string) error {
+	if err := s.checkConnection(); err != nil {
+		return err
+	}
+
 	_, err := s.client.client.Delete(ctx, key)
 	return err
 }

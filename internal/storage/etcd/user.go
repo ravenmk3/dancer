@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"dancer/internal/errors"
 	"dancer/internal/models"
@@ -16,12 +17,27 @@ type UserStorage struct {
 	client *Client
 }
 
+// defaultWaitTimeout 默认等待超时时间
+const defaultWaitTimeout = 5 * time.Second
+
 func NewUserStorage(client *Client) *UserStorage {
 	return &UserStorage{client: client}
 }
 
+// checkConnection 检查 etcd 连接，使用默认超时
+func (s *UserStorage) checkConnection() error {
+	if err := s.client.WaitForConnection(defaultWaitTimeout); err != nil {
+		return errors.ErrEtcdUnavailable
+	}
+	return nil
+}
+
 // GetUser 根据ID获取用户
 func (s *UserStorage) GetUser(ctx context.Context, id string) (*models.User, error) {
+	if err := s.checkConnection(); err != nil {
+		return nil, err
+	}
+
 	key := storage.UserKeyPrefix + id
 	resp, err := s.client.client.Get(ctx, key)
 	if err != nil {
@@ -42,6 +58,10 @@ func (s *UserStorage) GetUser(ctx context.Context, id string) (*models.User, err
 
 // GetUserByUsername 根据用户名获取用户（使用范围查询）
 func (s *UserStorage) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
+	if err := s.checkConnection(); err != nil {
+		return nil, err
+	}
+
 	// 获取所有用户并筛选
 	resp, err := s.client.client.Get(ctx, storage.UserKeyPrefix, clientv3.WithPrefix())
 	if err != nil {
@@ -63,6 +83,10 @@ func (s *UserStorage) GetUserByUsername(ctx context.Context, username string) (*
 
 // ListUsers 列出所有用户
 func (s *UserStorage) ListUsers(ctx context.Context) ([]*models.User, error) {
+	if err := s.checkConnection(); err != nil {
+		return nil, err
+	}
+
 	resp, err := s.client.client.Get(ctx, storage.UserKeyPrefix, clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
@@ -82,6 +106,10 @@ func (s *UserStorage) ListUsers(ctx context.Context) ([]*models.User, error) {
 
 // CreateUser 创建用户
 func (s *UserStorage) CreateUser(ctx context.Context, user *models.User) error {
+	if err := s.checkConnection(); err != nil {
+		return err
+	}
+
 	key := storage.UserKeyPrefix + user.ID
 
 	// 检查用户是否已存在（通过用户名）
@@ -101,6 +129,10 @@ func (s *UserStorage) CreateUser(ctx context.Context, user *models.User) error {
 
 // UpdateUser 更新用户
 func (s *UserStorage) UpdateUser(ctx context.Context, user *models.User) error {
+	if err := s.checkConnection(); err != nil {
+		return err
+	}
+
 	key := storage.UserKeyPrefix + user.ID
 
 	// 检查用户是否存在
@@ -120,6 +152,10 @@ func (s *UserStorage) UpdateUser(ctx context.Context, user *models.User) error {
 
 // DeleteUser 删除用户
 func (s *UserStorage) DeleteUser(ctx context.Context, id string) error {
+	if err := s.checkConnection(); err != nil {
+		return err
+	}
+
 	key := storage.UserKeyPrefix + id
 	_, err := s.client.client.Delete(ctx, key)
 	return err
@@ -127,6 +163,10 @@ func (s *UserStorage) DeleteUser(ctx context.Context, id string) error {
 
 // CountUsers 统计用户数量
 func (s *UserStorage) CountUsers(ctx context.Context) (int64, error) {
+	if err := s.checkConnection(); err != nil {
+		return 0, err
+	}
+
 	resp, err := s.client.client.Get(ctx, storage.UserKeyPrefix, clientv3.WithPrefix(), clientv3.WithCountOnly())
 	if err != nil {
 		return 0, err

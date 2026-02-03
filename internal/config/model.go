@@ -8,9 +8,13 @@ type Config struct {
 	} `toml:"app"`
 
 	Etcd struct {
-		Endpoints []string `toml:"endpoints"`
-		Username  string   `toml:"username"`
-		Password  string   `toml:"password"`
+		Endpoints            []string `toml:"endpoints"`
+		Username             string   `toml:"username"`
+		Password             string   `toml:"password"`
+		ReconnectInterval    int      `toml:"reconnect_interval"`     // 初始重连间隔(秒)
+		MaxReconnectInterval int      `toml:"max_reconnect_interval"` // 最大重连间隔(秒)
+		HealthCheckInterval  int      `toml:"health_check_interval"`  // 健康检查间隔(秒)
+		DialTimeout          int      `toml:"dial_timeout"`           // 连接超时(秒)
 	} `toml:"etcd"`
 
 	JWT struct {

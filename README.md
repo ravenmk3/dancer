@@ -15,7 +15,7 @@
 - 🔐 **JWT 认证** - HS256 签名，支持 Token 刷新
 - 👥 **RBAC 权限** - Admin / Normal 角色分离
 - 📝 **DNS 管理** - CRUD 操作，完美适配 CoreDNS etcd 格式
-- 🗄️ **etcd 存储** - 分布式高可用，域名反转层级存储
+- 🗄️ **etcd 存储** - 分布式高可用，域名存储
 - 🎨 **优雅日志** - logrus + lumberjack，支持轮转
 - ⚡ **高性能** - Echo 框架，极简内存占用
 

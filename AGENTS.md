@@ -37,11 +37,12 @@ HTTP 请求 → Handler → Service → Storage(etcd)
 
 - `User`: ID, Username, Password, UserType(admin/normal), CreatedAt, UpdatedAt
 - `DNSRecord`: ID, Domain, IP, TTL, CreatedAt, UpdatedAt
-- `Config`: App(host/port/env), Etcd(endpoints/credentials), JWT(secret/expiry), Logger
+- `Config`: App(host/port/env), Etcd(endpoints/credentials/reconnect_interval/max_reconnect_interval/health_check_interval/dial_timeout), JWT(secret/expiry), Logger
 
 ## API 路由
 
-```
+GET/POST /api/health            # 健康检查
+
 POST /api/auth/login
 POST /api/auth/refresh
 
@@ -66,7 +67,7 @@ POST /api/dns/records/delete
 
 ## 错误类型
 
-ErrUserNotFound, ErrUserExists, ErrInvalidCredentials, ErrWrongPassword, ErrRecordNotFound, ErrRecordExists, ErrInvalidToken, ErrTokenExpired, ErrUnauthorized, ErrForbidden, ErrInvalidInput
+ErrUserNotFound, ErrUserExists, ErrInvalidCredentials, ErrWrongPassword, ErrRecordNotFound, ErrRecordExists, ErrInvalidToken, ErrTokenExpired, ErrUnauthorized, ErrForbidden, ErrInvalidInput, ErrEtcdUnavailable
 
 ## 开发规范
 
@@ -79,6 +80,8 @@ ErrUserNotFound, ErrUserExists, ErrInvalidCredentials, ErrWrongPassword, ErrReco
 ## 关键文件
 
 - `internal/auth/middleware.go` - JWT 认证中间件
-- `internal/storage/etcd/client.go` - etcd 客户端封装
+- `internal/storage/etcd/client.go` - etcd 客户端封装（支持自动重连）
+- `internal/handlers/health.go` - 健康检查处理器
+- `internal/router/logger.go` - 自定义访问日志中间件
 - `internal/services/user_service.go` - 用户业务逻辑
 - `cmd/server/main.go` - 程序入口
