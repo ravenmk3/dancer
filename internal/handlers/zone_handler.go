@@ -108,8 +108,8 @@ func (h *ZoneHandler) DeleteZone(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, map[string]interface{}{
-		"code":    "success",
-		"message": "Zone deleted successfully",
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "Zone deleted successfully",
 	})
 }

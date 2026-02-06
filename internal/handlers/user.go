@@ -33,14 +33,13 @@ func (h *UserHandler) Login(c echo.Context) error {
 		return apperrors.ErrInvalidInput
 	}
 
-	token, user, err := h.userService.Login(c.Request().Context(), req.Username, req.Password)
+	token, _, err := h.userService.Login(c.Request().Context(), req.Username, req.Password)
 	if err != nil {
 		return err
 	}
 
 	return c.JSON(200, &models.LoginResponse{
 		Token: token,
-		User:  user,
 	})
 }
 
@@ -54,7 +53,11 @@ func (h *UserHandler) RefreshToken(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, map[string]string{"token": token})
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "success",
+		Data:    &models.LoginResponse{Token: token},
+	})
 }
 
 // GetCurrentUser 获取当前用户信息
@@ -86,9 +89,9 @@ func (h *UserHandler) ChangePassword(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, map[string]interface{}{
-		"code":    "success",
-		"message": "password changed successfully",
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "password changed successfully",
 	})
 }
 
@@ -136,9 +139,9 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, map[string]interface{}{
-		"code":    "success",
-		"message": "user updated successfully",
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "user updated successfully",
 	})
 }
 
@@ -154,15 +157,11 @@ func (h *UserHandler) DeleteUser(c echo.Context) error {
 	}
 
 	if err := h.userService.DeleteUser(c.Request().Context(), req.ID); err != nil {
-		// 特殊处理：不能删除默认管理员
-		if err.Error() == "cannot delete default admin user" {
-			return apperrors.ErrForbidden
-		}
 		return err
 	}
 
-	return c.JSON(200, map[string]interface{}{
-		"code":    "success",
-		"message": "user deleted successfully",
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "user deleted successfully",
 	})
 }

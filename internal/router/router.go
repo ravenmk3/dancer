@@ -3,7 +3,6 @@ package router
 import (
 	"errors"
 	"net/http"
-	"time"
 
 	"dancer/internal/auth"
 	apperrors "dancer/internal/errors"
@@ -41,14 +40,6 @@ func New(
 		AllowHeaders: []string{"Authorization", "Content-Type"},
 	}))
 
-	// 健康检查
-	e.GET("/health", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"status":    "ok",
-			"timestamp": time.Now().Format(time.RFC3339),
-		})
-	})
-
 	// API 路由组
 	api := e.Group("/api")
 
@@ -59,7 +50,7 @@ func New(
 	// 公开路由
 	authGroup := api.Group("/auth")
 	authGroup.POST("/login", userHandler.Login)
-	authGroup.POST("/refresh", userHandler.RefreshToken, auth.JWTMiddleware())
+	authGroup.POST("/refresh", userHandler.RefreshToken)
 
 	// 需要认证的路由
 	me := api.Group("/me", auth.JWTMiddleware())
@@ -129,6 +120,11 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 			Code:    "user_exists",
 			Message: err.Error(),
 		})
+	case errors.Is(err, apperrors.ErrCannotDeleteDefaultAdmin):
+		c.JSON(http.StatusForbidden, Response{
+			Code:    "cannot_delete_default_admin",
+			Message: err.Error(),
+		})
 	case errors.Is(err, apperrors.ErrInvalidCredentials):
 		c.JSON(http.StatusUnauthorized, Response{
 			Code:    "invalid_credentials",
@@ -136,7 +132,7 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 		})
 	case errors.Is(err, apperrors.ErrWrongPassword):
 		c.JSON(http.StatusBadRequest, Response{
-			Code:    "invalid_input",
+			Code:    "wrong_password",
 			Message: err.Error(),
 		})
 

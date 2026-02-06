@@ -23,4 +23,7 @@ var (
 	// Domain 相关错误
 	ErrDomainNotFound = errors.New("domain not found")
 	ErrDomainExists   = errors.New("domain already exists")
+
+	// 其他业务错误
+	ErrCannotDeleteDefaultAdmin = errors.New("cannot delete default admin user")
 )

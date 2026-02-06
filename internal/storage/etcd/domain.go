@@ -215,11 +215,16 @@ func (s *DomainStorage) domainPrefix(zone string) string {
 }
 
 // generateCoreDNSKey 生成 CoreDNS 的 etcd key
+// 格式: {prefix}/{反转zone}/{domain}/x{index}
+// 示例: /skydns/com/example/www/x1
 func (s *DomainStorage) generateCoreDNSKey(zone, domain, index string) string {
-	// 反转 zone：example.com -> com/example
 	reversed := reverseZone(zone)
 	prefix := s.getCoreDNSPrefix()
-	return path.Join(prefix, reversed, domain, "x"+index)
+	key := path.Join(prefix, reversed, domain, "x"+index)
+	if !strings.HasPrefix(key, "/") {
+		key = "/" + key
+	}
+	return key
 }
 
 // reverseZone 反转域名层级

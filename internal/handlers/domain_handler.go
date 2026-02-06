@@ -117,8 +117,8 @@ func (h *DomainHandler) DeleteDomain(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, map[string]interface{}{
-		"code":    "success",
-		"message": "Domain deleted successfully",
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "Domain deleted successfully",
 	})
 }

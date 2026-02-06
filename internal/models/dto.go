@@ -106,7 +106,6 @@ type Response struct {
 // LoginResponse 登录响应
 type LoginResponse struct {
 	Token string `json:"token"`
-	User  *User  `json:"user"`
 }
 
 // UserListResponse 用户列表响应

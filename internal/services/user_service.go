@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -180,7 +179,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *models.UpdateUserRequ
 func (s *UserService) DeleteUser(ctx context.Context, userID string) error {
 	// 检查是否是默认管理员
 	if userID == "10000" {
-		return errors.New("cannot delete default admin user")
+		return apperrors.ErrCannotDeleteDefaultAdmin
 	}
 
 	return s.userStorage.DeleteUser(ctx, userID)

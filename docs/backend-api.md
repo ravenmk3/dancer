@@ -33,6 +33,8 @@ Authorization: Bearer <token>
 }
 ```
 
+**说明**: `data` 字段为可选（omitempty），某些操作（如删除）可能不返回 `data` 字段。
+
 ### 错误响应
 
 ```json
@@ -49,14 +51,20 @@ Authorization: Bearer <token>
 | `success` | 200 | 操作成功 |
 | `invalid_input` | 400 | 请求参数无效 |
 | `invalid_credentials` | 401 | 用户名或密码错误 |
+| `wrong_password` | 400 | 密码错误（修改密码时） |
 | `unauthorized` | 401 | 未认证或 Token 无效 |
+| `invalid_token` | 401 | Token 格式无效 |
+| `token_expired` | 401 | Token 已过期 |
 | `forbidden` | 403 | 权限不足 |
+| `cannot_delete_default_admin` | 403 | 不能删除默认管理员 |
 | `user_not_found` | 404 | 用户不存在 |
 | `user_exists` | 409 | 用户已存在 |
 | `zone_not_found` | 404 | Zone (二级域名) 不存在 |
 | `zone_exists` | 409 | Zone 已存在 |
 | `domain_not_found` | 404 | Domain 不存在 |
 | `domain_exists` | 409 | Domain 已存在 |
+| `record_not_found` | 404 | DNS 记录不存在 |
+| `record_exists` | 409 | DNS 记录已存在 |
 | `service_unavailable` | 503 | etcd 服务不可用 |
 | `internal_error` | 500 | 服务器内部错误 |
 
@@ -87,14 +95,7 @@ Content-Type: application/json
   "code": "success",
   "message": "success",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": {
-      "id": "user-uuid",
-      "username": "admin",
-      "user_type": "admin",
-      "created_at": 1704067200,
-      "updated_at": 1704067200
-    }
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   }
 }
 ```

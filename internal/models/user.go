@@ -10,7 +10,15 @@ const (
 type User struct {
 	ID        string   `json:"id"`
 	Username  string   `json:"username"`
-	Password  string   `json:"-"` // 不序列化
+	Password  string   `json:"password"`
+	UserType  UserType `json:"user_type"`
+	CreatedAt int64    `json:"created_at"`
+	UpdatedAt int64    `json:"updated_at"`
+}
+
+type UserResponse struct {
+	ID        string   `json:"id"`
+	Username  string   `json:"username"`
 	UserType  UserType `json:"user_type"`
 	CreatedAt int64    `json:"created_at"`
 	UpdatedAt int64    `json:"updated_at"`
