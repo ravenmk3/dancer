@@ -668,7 +668,7 @@ Authorization: <valid_token>
 - 存在有效 Token
 
 **测试步骤**:
-1. 修改有效 Token 的某一位字符
+1. 修改有效 Token 签名部分的第一个字符（改为其他 Base64 有效字符，如 `a` → `X`）
 2. 发送 POST 请求到 `/api/auth/refresh`
 3. 使用篡改后的 Token
 
@@ -676,14 +676,15 @@ Authorization: <valid_token>
 ```http
 Authorization: Bearer <tampered_token>
 ```
+> 示例：将有效 Token `eyJhbG...xxxxx` 的签名部分第一个字符 `x` 改为 `X`，得到 `eyJhbG...Xxxxx`
 
 **预期结果**:
 - HTTP 状态码: 401
 - 响应 JSON:
 ```json
 {
-  "code": "unauthorized",
-  "message": "Token 无效或过期"
+  "code": "http_error",
+  "message": "code=401, message=invalid token"
 }
 ```
 - 系统应检测出 Token 被篡改

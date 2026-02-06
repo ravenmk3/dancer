@@ -50,7 +50,7 @@ func New(
 	// 公开路由
 	authGroup := api.Group("/auth")
 	authGroup.POST("/login", userHandler.Login)
-	authGroup.POST("/refresh", userHandler.RefreshToken)
+	authGroup.POST("/refresh", userHandler.RefreshToken, auth.JWTMiddleware())
 
 	// 需要认证的路由
 	me := api.Group("/me", auth.JWTMiddleware())
