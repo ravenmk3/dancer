@@ -215,9 +215,3 @@ curl -X POST http://localhost:8080/api/dns/domains/update \
 
 - [API 文档](docs/backend-api.md) - 详细的 API 说明
 - [设计文档](docs/backend-design.md) - 架构和设计细节
-
----
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！

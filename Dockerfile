@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # 构建
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o dancer ./cmd/server
 
 # Final stage
 FROM alpine:latest
@@ -25,7 +25,7 @@ WORKDIR /app
 RUN apk --no-cache add ca-certificates
 
 # 从 builder 复制二进制文件
-COPY --from=builder /app/server .
+COPY --from=builder /app/dancer .
 COPY --from=builder /app/config.toml .
 
 # 创建日志目录
@@ -35,4 +35,4 @@ RUN mkdir -p logs
 EXPOSE 8080
 
 # 运行
-CMD ["./server"]
+CMD ["./dancer"]

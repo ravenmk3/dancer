@@ -42,33 +42,34 @@ HTTP 请求 → Handler → Service → Storage(etcd)
 
 ## API 路由
 
-GET/POST /api/health            # 健康检查
+- GET/POST /api/health          # 健康检查
+- POST /api/auth/login
+- POST /api/auth/refresh
+- POST /api/me                  # 获取当前用户
+- POST /api/me/change-password  # 修改密码
 
-POST /api/auth/login
-POST /api/auth/refresh
+### 用户管理 (Admin)
 
-POST /api/me                    # 获取当前用户
-POST /api/me/change-password    # 修改密码
+- POST /api/user/list
+- POST /api/user/create
+- POST /api/user/update
+- POST /api/user/delete
 
-POST /api/user/list             # Admin 权限
-POST /api/user/create
-POST /api/user/update
-POST /api/user/delete
+### Zone 管理 (Admin)
 
-# Zone 管理 (Admin)
-POST /api/dns/zones/list
-POST /api/dns/zones/get
-POST /api/dns/zones/create
-POST /api/dns/zones/update
-POST /api/dns/zones/delete
+- POST /api/dns/zones/list
+- POST /api/dns/zones/get
+- POST /api/dns/zones/create
+- POST /api/dns/zones/update
+- POST /api/dns/zones/delete
 
-# Domain 管理 (JWT)
-POST /api/dns/domains/list
-POST /api/dns/domains/get
-POST /api/dns/domains/create
-POST /api/dns/domains/update
-POST /api/dns/domains/delete
-```
+### Domain 管理 (JWT)
+
+- POST /api/dns/domains/list
+- POST /api/dns/domains/get
+- POST /api/dns/domains/create
+- POST /api/dns/domains/update
+- POST /api/dns/domains/delete
 
 ## etcd Key 规范
 
