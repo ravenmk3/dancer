@@ -201,7 +201,7 @@ POST   /api/dns/domains/delete      # 删除 Domain（级联删除）
 
 | 数据类型 | Key 格式 | 示例 |
 |---------|---------|------|
-| 用户记录 | `/dance/users/{user-id}` | `/dance/users/1701234567890` |
+| 用户记录 | `/dancer/users/{user-id}` | `/dancer/users/1701234567890` |
 | Zone | `/dancer/zones/{zone}` | `/dancer/zones/example.com` |
 | Domain | `/dancer/domains/{zone}/{domain}` | `/dancer/domains/example.com/www` |
 | CoreDNS | `{prefix}/{反转zone}/{domain}/x{n}` | `/skydns/com/example/www/x1` |

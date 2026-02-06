@@ -73,7 +73,7 @@ HTTP 请求 → Handler → Service → Storage(etcd)
 
 ## etcd Key 规范
 
-- 用户: `/dance/users/{user-id}`
+- 用户: `/dancer/users/{user-id}`
 - Zone: `/dancer/zones/{zone}` (例: `example.com`)
 - Domain: `/dancer/domains/{zone}/{domain}` (例: `www.example.com`)
 - CoreDNS: `{prefix}/{反转zone}/{domain}/x{n}` (例: `/skydns/com/example/www/x1`)

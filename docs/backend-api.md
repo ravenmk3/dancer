@@ -906,7 +906,7 @@ HTTP 状态码: 503
 ### 用户数据
 
 ```
-/dance/users/{user-id}
+/dancer/users/{user-id}
 ```
 
 ### Dancer 管理数据
