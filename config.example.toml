@@ -7,6 +7,12 @@ env = "development"
 endpoints = ["http://localhost:2379"]
 # username = ""
 # password = ""
+reconnect_interval = 5
+max_reconnect_interval = 30
+health_check_interval = 30
+dial_timeout = 5
+# CoreDNS etcd 插件的 key 前缀，默认 /skydns
+# coredns_prefix = "/skydns"
 
 [jwt]
 secret = "your-secret-key-here-change-in-production"

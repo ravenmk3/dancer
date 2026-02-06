@@ -49,6 +49,9 @@ func Load(path string) error {
 	if cfg.Logger.MaxAge == 0 {
 		cfg.Logger.MaxAge = 7
 	}
+	if cfg.Etcd.CorednsPrefix == "" {
+		cfg.Etcd.CorednsPrefix = "/skydns"
+	}
 
 	GlobalConfig = &cfg
 	return nil

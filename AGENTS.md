@@ -36,8 +36,9 @@ HTTP 请求 → Handler → Service → Storage(etcd)
 ## 关键模型
 
 - `User`: ID, Username, Password, UserType(admin/normal), CreatedAt, UpdatedAt
-- `DNSRecord`: ID, Domain, IP, TTL, CreatedAt, UpdatedAt
-- `Config`: App(host/port/env), Etcd(endpoints/credentials/reconnect_interval/max_reconnect_interval/health_check_interval/dial_timeout), JWT(secret/expiry), Logger
+- `Zone`: Zone(二级域名), RecordCount, CreatedAt, UpdatedAt
+- `Domain`: Zone, Domain, Name, IPs[], TTL, RecordCount, CreatedAt, UpdatedAt
+- `Config`: App(host/port/env), Etcd(..., coredns_prefix), JWT(secret/expiry), Logger
 
 ## API 路由
 
@@ -54,20 +55,31 @@ POST /api/user/create
 POST /api/user/update
 POST /api/user/delete
 
-POST /api/dns/records/list
-POST /api/dns/records/create
-POST /api/dns/records/update
-POST /api/dns/records/delete
+# Zone 管理 (Admin)
+POST /api/dns/zones/list
+POST /api/dns/zones/get
+POST /api/dns/zones/create
+POST /api/dns/zones/update
+POST /api/dns/zones/delete
+
+# Domain 管理 (JWT)
+POST /api/dns/domains/list
+POST /api/dns/domains/get
+POST /api/dns/domains/create
+POST /api/dns/domains/update
+POST /api/dns/domains/delete
 ```
 
 ## etcd Key 规范
 
 - 用户: `/dance/users/{user-id}`
-- DNS: `/coredns/{反转域名}/{子域名}` (例: `github.com` → `/coredns/com/github`)
+- Zone: `/dancer/zones/{zone}` (例: `example.com`)
+- Domain: `/dancer/domains/{zone}/{domain}` (例: `www.example.com`)
+- CoreDNS: `{prefix}/{反转zone}/{domain}/x{n}` (例: `/skydns/com/example/www/x1`)
 
 ## 错误类型
 
-ErrUserNotFound, ErrUserExists, ErrInvalidCredentials, ErrWrongPassword, ErrRecordNotFound, ErrRecordExists, ErrInvalidToken, ErrTokenExpired, ErrUnauthorized, ErrForbidden, ErrInvalidInput, ErrEtcdUnavailable
+ErrUserNotFound, ErrUserExists, ErrInvalidCredentials, ErrWrongPassword, ErrRecordNotFound, ErrRecordExists, ErrZoneNotFound, ErrZoneExists, ErrDomainNotFound, ErrDomainExists, ErrInvalidToken, ErrTokenExpired, ErrUnauthorized, ErrForbidden, ErrInvalidInput, ErrEtcdUnavailable
 
 ## 开发规范
 

@@ -34,29 +34,64 @@ type ChangePasswordRequest struct {
 	NewPassword string `json:"new_password" validate:"required,min=6"`
 }
 
-// CreateDNSRequest 创建DNS记录请求
-type CreateDNSRequest struct {
-	Domain string `json:"domain" validate:"required,fqdn"`
-	IP     string `json:"ip" validate:"required,ip"`
-	TTL    int64  `json:"ttl" validate:"required,min=60"`
+// Zone 相关请求
+
+// ListZonesRequest 列出所有 Zone 请求
+type ListZonesRequest struct{}
+
+// GetZoneRequest 获取 Zone 详情请求
+type GetZoneRequest struct {
+	Zone string `json:"zone" validate:"required,fqdn"`
 }
 
-// UpdateDNSRequest 更新DNS记录请求
-type UpdateDNSRequest struct {
-	Key    string `json:"key" validate:"required"`
-	Domain string `json:"domain" validate:"omitempty,fqdn"`
-	IP     string `json:"ip" validate:"omitempty,ip"`
-	TTL    int64  `json:"ttl" validate:"omitempty,min=60"`
+// CreateZoneRequest 创建 Zone 请求
+type CreateZoneRequest struct {
+	Zone string `json:"zone" validate:"required,fqdn"`
 }
 
-// DeleteDNSRequest 删除DNS记录请求
-type DeleteDNSRequest struct {
-	Key string `json:"key" validate:"required"`
+// UpdateZoneRequest 更新 Zone 请求
+type UpdateZoneRequest struct {
+	Zone string `json:"zone" validate:"required,fqdn"`
 }
 
-// ListDNSRequest 列出DNS记录请求
-type ListDNSRequest struct {
-	Domain string `json:"domain"` // 可选，为空时列出所有
+// DeleteZoneRequest 删除 Zone 请求
+type DeleteZoneRequest struct {
+	Zone string `json:"zone" validate:"required,fqdn"`
+}
+
+// Domain 相关请求
+
+// ListDomainsRequest 列出 Zone 下所有 Domain 请求
+type ListDomainsRequest struct {
+	Zone string `json:"zone" validate:"required,fqdn"`
+}
+
+// GetDomainRequest 获取 Domain 详情请求
+type GetDomainRequest struct {
+	Zone   string `json:"zone" validate:"required,fqdn"`
+	Domain string `json:"domain" validate:"required"`
+}
+
+// CreateDomainRequest 创建 Domain 请求
+type CreateDomainRequest struct {
+	Zone   string   `json:"zone" validate:"required,fqdn"`
+	Domain string   `json:"domain" validate:"required"`
+	IPs    []string `json:"ips" validate:"required,dive,ip"`
+	TTL    int      `json:"ttl" validate:"required,min=1"`
+}
+
+// UpdateDomainRequest 更新 Domain 请求
+type UpdateDomainRequest struct {
+	Zone   string   `json:"zone" validate:"required,fqdn"`
+	Domain string   `json:"domain" validate:"required"`
+	IPs    []string `json:"ips" validate:"required,dive,ip"`
+	TTL    int      `json:"ttl" validate:"omitempty,min=1"`
+}
+
+// DeleteDomainRequest 删除 Domain 请求
+type DeleteDomainRequest struct {
+	Zone   string `json:"zone" validate:"required,fqdn"`
+	Domain string `json:"domain" validate:"required"`
 }
 
 // 响应 DTO
@@ -79,12 +114,22 @@ type UserListResponse struct {
 	Users []*User `json:"users"`
 }
 
-// DNSListResponse DNS记录列表响应
-type DNSListResponse struct {
-	Records []*DNSRecord `json:"records"`
+// ZoneListResponse Zone 列表响应
+type ZoneListResponse struct {
+	Zones []*Zone `json:"zones"`
 }
 
-// DNSResponse DNS记录响应
-type DNSResponse struct {
-	Record *DNSRecord `json:"record"`
+// ZoneResponse Zone 详情响应
+type ZoneResponse struct {
+	Zone *Zone `json:"zone"`
+}
+
+// DomainListResponse Domain 列表响应
+type DomainListResponse struct {
+	Domains []*Domain `json:"domains"`
+}
+
+// DomainResponse Domain 详情响应
+type DomainResponse struct {
+	Domain *Domain `json:"domain"`
 }

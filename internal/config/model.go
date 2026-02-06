@@ -15,6 +15,7 @@ type Config struct {
 		MaxReconnectInterval int      `toml:"max_reconnect_interval"` // 最大重连间隔(秒)
 		HealthCheckInterval  int      `toml:"health_check_interval"`  // 健康检查间隔(秒)
 		DialTimeout          int      `toml:"dial_timeout"`           // 连接超时(秒)
+		CorednsPrefix        string   `toml:"coredns_prefix"`         // CoreDNS etcd key 前缀, 默认 /skydns
 	} `toml:"etcd"`
 
 	JWT struct {

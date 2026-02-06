@@ -2,7 +2,7 @@
 
 ## 概述
 
-Dancer 是一个基于 etcd 的 DNS 管理工具，提供 RESTful API 接口。
+Dancer 是一个基于 etcd 的 DNS 管理工具，专为 CoreDNS 设计，提供 RESTful API 接口。
 
 **基础 URL**: `http://{host}:{port}/api`
 
@@ -10,7 +10,7 @@ Dancer 是一个基于 etcd 的 DNS 管理工具，提供 RESTful API 接口。
 
 ## 认证机制
 
-所有 API (除登录和刷新 Token 外) 都需要在请求头中携带 JWT Token：
+所有 API (除登录、刷新 Token、健康检查外) 都需要在请求头中携带 JWT Token：
 
 ```
 Authorization: Bearer <token>
@@ -18,8 +18,8 @@ Authorization: Bearer <token>
 
 ### 权限级别
 
-1. **普通用户 (normal)**: 可以管理自己的 DNS 记录
-2. **管理员 (admin)**: 可以管理用户和 DNS 记录
+1. **普通用户 (normal)**: 可以管理 DNS Domain
+2. **管理员 (admin)**: 可以管理用户、Zone 和 Domain
 
 ## 响应格式
 
@@ -53,8 +53,10 @@ Authorization: Bearer <token>
 | `forbidden` | 403 | 权限不足 |
 | `user_not_found` | 404 | 用户不存在 |
 | `user_exists` | 409 | 用户已存在 |
-| `record_not_found` | 404 | DNS 记录不存在 |
-| `record_exists` | 409 | DNS 记录已存在 |
+| `zone_not_found` | 404 | Zone (二级域名) 不存在 |
+| `zone_exists` | 409 | Zone 已存在 |
+| `domain_not_found` | 404 | Domain 不存在 |
+| `domain_exists` | 409 | Domain 已存在 |
 | `service_unavailable` | 503 | etcd 服务不可用 |
 | `internal_error` | 500 | 服务器内部错误 |
 
@@ -375,25 +377,18 @@ Content-Type: application/json
 
 ---
 
-### DNS 记录管理模块
+### Zone 管理模块 (Admin)
 
-#### 9. 列出 DNS 记录
+Zone 代表二级域名，如 `example.com`。
+
+#### 9. 列出所有 Zone
 
 **请求**
 
 ```http
-POST /api/dns/records/list
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "domain": "example.com"
-}
+POST /api/dns/zones/list
+Authorization: Bearer <token> (需 Admin 权限)
 ```
-
-**说明**
-
-- `domain`: 可选，为空时列出所有 DNS 记录
 
 **响应**
 
@@ -402,13 +397,10 @@ Content-Type: application/json
   "code": "success",
   "message": "success",
   "data": {
-    "records": [
+    "zones": [
       {
-        "key": "/coredns/com/example",
-        "id": "record-uuid",
-        "domain": "example.com",
-        "ip": "192.168.1.1",
-        "ttl": 300,
+        "zone": "example.com",
+        "record_count": 5,
         "created_at": 1704067200,
         "updated_at": 1704067200
       }
@@ -419,31 +411,24 @@ Content-Type: application/json
 
 **错误场景**
 
+- `forbidden` (403): 非 Admin 用户
 - `unauthorized` (401): Token 无效或过期
 
 ---
 
-#### 10. 创建 DNS 记录
+#### 10. 获取 Zone 详情
 
 **请求**
 
 ```http
-POST /api/dns/records/create
-Authorization: Bearer <token>
+POST /api/dns/zones/get
+Authorization: Bearer <token> (需 Admin 权限)
 Content-Type: application/json
 
 {
-  "domain": "example.com",
-  "ip": "192.168.1.1",
-  "ttl": 300
+  "zone": "example.com"
 }
 ```
-
-**字段约束**
-
-- `domain`: 有效的 FQDN (完全限定域名)，必填
-- `ip`: 有效的 IP 地址，必填
-- `ttl`: 最小值 60 秒，必填
 
 **响应**
 
@@ -452,12 +437,9 @@ Content-Type: application/json
   "code": "success",
   "message": "success",
   "data": {
-    "record": {
-      "key": "/coredns/com/example",
-      "id": "record-uuid",
-      "domain": "example.com",
-      "ip": "192.168.1.1",
-      "ttl": 300,
+    "zone": {
+      "zone": "example.com",
+      "record_count": 5,
       "created_at": 1704067200,
       "updated_at": 1704067200
     }
@@ -467,34 +449,29 @@ Content-Type: application/json
 
 **错误场景**
 
-- `invalid_input` (400): 请求参数不符合约束
+- `zone_not_found` (404): Zone 不存在
+- `forbidden` (403): 非 Admin 用户
 - `unauthorized` (401): Token 无效或过期
 
 ---
 
-#### 11. 更新 DNS 记录
+#### 11. 创建 Zone
 
 **请求**
 
 ```http
-POST /api/dns/records/update
-Authorization: Bearer <token>
+POST /api/dns/zones/create
+Authorization: Bearer <token> (需 Admin 权限)
 Content-Type: application/json
 
 {
-  "key": "/coredns/com/example",
-  "domain": "example.com",
-  "ip": "192.168.1.2",
-  "ttl": 600
+  "zone": "example.com"
 }
 ```
 
 **字段约束**
 
-- `key`: 必填，DNS 记录的 etcd key
-- `domain`: 有效的 FQDN，可选
-- `ip`: 有效的 IP 地址，可选
-- `ttl`: 最小值 60 秒，可选
+- `zone`: 有效的二级域名（FQDN），必填
 
 **响应**
 
@@ -503,12 +480,49 @@ Content-Type: application/json
   "code": "success",
   "message": "success",
   "data": {
-    "record": {
-      "key": "/coredns/com/example",
-      "id": "record-uuid",
-      "domain": "example.com",
-      "ip": "192.168.1.2",
-      "ttl": 600,
+    "zone": {
+      "zone": "example.com",
+      "record_count": 0,
+      "created_at": 1704067200,
+      "updated_at": 1704067200
+    }
+  }
+}
+```
+
+**错误场景**
+
+- `zone_exists` (409): Zone 已存在
+- `invalid_input` (400): 请求参数不符合约束
+- `forbidden` (403): 非 Admin 用户
+- `unauthorized` (401): Token 无效或过期
+
+---
+
+#### 12. 更新 Zone
+
+**请求**
+
+```http
+POST /api/dns/zones/update
+Authorization: Bearer <token> (需 Admin 权限)
+Content-Type: application/json
+
+{
+  "zone": "example.com"
+}
+```
+
+**响应**
+
+```json
+{
+  "code": "success",
+  "message": "success",
+  "data": {
+    "zone": {
+      "zone": "example.com",
+      "record_count": 5,
       "created_at": 1704067200,
       "updated_at": 1704153600
     }
@@ -518,43 +532,295 @@ Content-Type: application/json
 
 **错误场景**
 
-- `record_not_found` (404): DNS 记录不存在
-- `invalid_input` (400): 请求参数不符合约束
+- `zone_not_found` (404): Zone 不存在
+- `forbidden` (403): 非 Admin 用户
 - `unauthorized` (401): Token 无效或过期
 
 ---
 
-#### 12. 删除 DNS 记录
+#### 13. 删除 Zone
 
 **请求**
 
 ```http
-POST /api/dns/records/delete
-Authorization: Bearer <token>
+POST /api/dns/zones/delete
+Authorization: Bearer <token> (需 Admin 权限)
 Content-Type: application/json
 
 {
-  "key": "/coredns/com/example"
+  "zone": "example.com"
 }
 ```
 
-**字段约束**
+**说明**
 
-- `key`: 必填，DNS 记录的 etcd key
+- 删除 Zone 会**级联删除**该 Zone 下的所有 Domain 及其 CoreDNS 记录
 
 **响应**
 
 ```json
 {
   "code": "success",
-  "message": "DNS record deleted successfully",
+  "message": "Zone deleted successfully",
   "data": null
 }
 ```
 
 **错误场景**
 
-- `record_not_found` (404): DNS 记录不存在
+- `zone_not_found` (404): Zone 不存在
+- `forbidden` (403): 非 Admin 用户
+- `unauthorized` (401): Token 无效或过期
+
+---
+
+### Domain 管理模块 (JWT)
+
+Domain 代表完整域名（子域名），如 Zone `example.com` 下的 `www` 或 `@`（根）。
+
+#### 14. 列出 Zone 下所有 Domain
+
+**请求**
+
+```http
+POST /api/dns/domains/list
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "zone": "example.com"
+}
+```
+
+**响应**
+
+```json
+{
+  "code": "success",
+  "message": "success",
+  "data": {
+    "domains": [
+      {
+        "zone": "example.com",
+        "domain": "www",
+        "name": "www.example.com",
+        "ips": ["192.168.1.1", "192.168.1.2"],
+        "ttl": 300,
+        "record_count": 2,
+        "created_at": 1704067200,
+        "updated_at": 1704067200
+      },
+      {
+        "zone": "example.com",
+        "domain": "@",
+        "name": "example.com",
+        "ips": ["192.168.1.10"],
+        "ttl": 600,
+        "record_count": 1,
+        "created_at": 1704067200,
+        "updated_at": 1704067200
+      }
+    ]
+  }
+}
+```
+
+**错误场景**
+
+- `zone_not_found` (404): Zone 不存在
+- `unauthorized` (401): Token 无效或过期
+
+---
+
+#### 15. 获取 Domain 详情
+
+**请求**
+
+```http
+POST /api/dns/domains/get
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "zone": "example.com",
+  "domain": "www"
+}
+```
+
+**响应**
+
+```json
+{
+  "code": "success",
+  "message": "success",
+  "data": {
+    "domain": {
+      "zone": "example.com",
+      "domain": "www",
+      "name": "www.example.com",
+      "ips": ["192.168.1.1", "192.168.1.2"],
+      "ttl": 300,
+      "record_count": 2,
+      "created_at": 1704067200,
+      "updated_at": 1704067200
+    }
+  }
+}
+```
+
+**错误场景**
+
+- `zone_not_found` (404): Zone 不存在
+- `domain_not_found` (404): Domain 不存在
+- `unauthorized` (401): Token 无效或过期
+
+---
+
+#### 16. 创建 Domain
+
+**请求**
+
+```http
+POST /api/dns/domains/create
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "zone": "example.com",
+  "domain": "www",
+  "ips": ["192.168.1.1", "192.168.1.2"],
+  "ttl": 300
+}
+```
+
+**字段约束**
+
+- `zone`: 已存在的 Zone 名称，必填
+- `domain`: 子域名部分（如 `www` 或 `@` 代表根），必填
+- `ips`: IP 地址数组，必填，每个 IP 必须是有效格式
+- `ttl`: TTL (秒)，必填，最小值 1
+
+**响应**
+
+```json
+{
+  "code": "success",
+  "message": "success",
+  "data": {
+    "domain": {
+      "zone": "example.com",
+      "domain": "www",
+      "name": "www.example.com",
+      "ips": ["192.168.1.1", "192.168.1.2"],
+      "ttl": 300,
+      "record_count": 2,
+      "created_at": 1704067200,
+      "updated_at": 1704067200
+    }
+  }
+}
+```
+
+**错误场景**
+
+- `zone_not_found` (404): Zone 不存在，需要先创建 Zone
+- `domain_exists` (409): Domain 已存在
+- `invalid_input` (400): 请求参数不符合约束
+- `unauthorized` (401): Token 无效或过期
+
+---
+
+#### 17. 更新 Domain
+
+**请求**
+
+```http
+POST /api/dns/domains/update
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "zone": "example.com",
+  "domain": "www",
+  "ips": ["192.168.1.3", "192.168.1.4"],
+  "ttl": 600
+}
+```
+
+**字段约束**
+
+- `zone`: 必填
+- `domain`: 必填
+- `ips`: IP 地址数组，必填，会**替换**现有的所有 IP
+- `ttl`: 可选，不填则保持原值
+
+**说明**
+
+- 系统会自动比较新旧 IP 列表，添加新 IP、删除不再使用的 IP，保持 CoreDNS 记录与请求一致
+
+**响应**
+
+```json
+{
+  "code": "success",
+  "message": "success",
+  "data": {
+    "domain": {
+      "zone": "example.com",
+      "domain": "www",
+      "name": "www.example.com",
+      "ips": ["192.168.1.3", "192.168.1.4"],
+      "ttl": 600,
+      "record_count": 2,
+      "created_at": 1704067200,
+      "updated_at": 1704153600
+    }
+  }
+}
+```
+
+**错误场景**
+
+- `zone_not_found` (404): Zone 不存在
+- `domain_not_found` (404): Domain 不存在
+- `invalid_input` (400): 请求参数不符合约束
+- `unauthorized` (401): Token 无效或过期
+
+---
+
+#### 18. 删除 Domain
+
+**请求**
+
+```http
+POST /api/dns/domains/delete
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "zone": "example.com",
+  "domain": "www"
+}
+```
+
+**说明**
+
+- 删除 Domain 会**级联删除**该 Domain 的所有 CoreDNS 记录
+
+**响应**
+
+```json
+{
+  "code": "success",
+  "message": "Domain deleted successfully",
+  "data": null
+}
+```
+
+**错误场景**
+
+- `zone_not_found` (404): Zone 不存在
+- `domain_not_found` (404): Domain 不存在
 - `invalid_input` (400): 请求参数不符合约束
 - `unauthorized` (401): Token 无效或过期
 
@@ -562,7 +828,7 @@ Content-Type: application/json
 
 ## 健康检查
 
-### 新增端点
+### 端点
 
 ```http
 GET /api/health
@@ -611,15 +877,25 @@ HTTP 状态码: 503
 | `created_at` | int64 | 创建时间 (Unix 时间戳) |
 | `updated_at` | int64 | 更新时间 (Unix 时间戳) |
 
-### DNSRecord
+### Zone
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `key` | string | etcd 存储 key (如 `/coredns/com/example`) |
-| `id` | string | 记录唯一标识 |
-| `domain` | string | 域名 (如 `example.com`) |
-| `ip` | string | IP 地址 |
-| `ttl` | int64 | TTL (秒)，最小 60 |
+| `zone` | string | 二级域名 (如 `example.com`) |
+| `record_count` | int | 该 Zone 下的 Domain 数量 |
+| `created_at` | int64 | 创建时间 (Unix 时间戳) |
+| `updated_at` | int64 | 更新时间 (Unix 时间戳) |
+
+### Domain
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `zone` | string | 所属 Zone (如 `example.com`) |
+| `domain` | string | 子域名部分 (如 `www` 或 `@`) |
+| `name` | string | 完整域名 (如 `www.example.com`) |
+| `ips` | []string | IP 地址列表 |
+| `ttl` | int | TTL (秒) |
+| `record_count` | int | IP 记录数量 |
 | `created_at` | int64 | 创建时间 (Unix 时间戳) |
 | `updated_at` | int64 | 更新时间 (Unix 时间戳) |
 
@@ -633,25 +909,46 @@ HTTP 状态码: 503
 /dance/users/{user-id}
 ```
 
-### DNS 记录
+### Dancer 管理数据
 
-域名反转存储，例如 `github.com`:
-
-```
-/coredns/com/github
-```
-
-子域名 `www.github.com`:
+#### Zone
 
 ```
-/coredns/com/github/www
+/dancer/zones/{zone}
 ```
+
+示例: `/dancer/zones/example.com`
+
+#### Domain
+
+```
+/dancer/domains/{zone}/{domain}
+```
+
+示例: 
+- `/dancer/domains/example.com/www` (www.example.com)
+- `/dancer/domains/example.com/@` (example.com 根域名)
+
+### CoreDNS 记录数据
+
+```
+/{prefix}/{反转zone}/{domain}/x{n}
+```
+
+- `{prefix}`: CoreDNS etcd 前缀，默认 `/skydns`，可配置
+- `{反转zone}`: Zone 的反转格式，如 `example.com` → `com/example`
+- `{domain}`: 子域名
+- `x{n}`: 记录索引，如 `x1`, `x2`...
+
+示例 (prefix=/skydns):
+- `www.example.com` → `/skydns/com/example/www/x1`, `/skydns/com/example/www/x2`...
+- `example.com` (根) → `/skydns/com/example/x1`...
 
 ---
 
 ## 使用示例
 
-### 登录并获取 Token
+### 1. 登录并获取 Token
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
@@ -659,20 +956,40 @@ curl -X POST http://localhost:8080/api/auth/login \
   -d '{"username":"admin","password":"admin123"}'
 ```
 
-### 创建 DNS 记录
+### 2. 创建 Zone (需 Admin)
 
 ```bash
-curl -X POST http://localhost:8080/api/dns/records/create \
+curl -X POST http://localhost:8080/api/dns/zones/create \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
-  -d '{"domain":"example.com","ip":"192.168.1.1","ttl":300}'
+  -d '{"zone":"example.com"}'
 ```
 
-### 列出 DNS 记录
+### 3. 创建 Domain
 
 ```bash
-curl -X POST http://localhost:8080/api/dns/records/list \
-  -H "Authorization: Bearer <token>"
+curl -X POST http://localhost:8080/api/dns/domains/create \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"zone":"example.com","domain":"www","ips":["192.168.1.1","192.168.1.2"],"ttl":300}'
+```
+
+### 4. 列出 Zone 下所有 Domain
+
+```bash
+curl -X POST http://localhost:8080/api/dns/domains/list \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"zone":"example.com"}'
+```
+
+### 5. 更新 Domain IP 列表
+
+```bash
+curl -X POST http://localhost:8080/api/dns/domains/update \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"zone":"example.com","domain":"www","ips":["192.168.1.3"],"ttl":600}'
 ```
 
 ---
@@ -685,4 +1002,6 @@ curl -X POST http://localhost:8080/api/dns/records/list \
 4. JWT Token 过期时间可配置
 5. 默认管理员账号在系统启动时自动创建
 6. 健康检查端点 /api/health 同时支持 GET 和 POST 方法
-7. 错误响应由统一的 HTTPErrorHandler 处理
+7. 创建 Domain 前必须先创建对应的 Zone
+8. 删除 Zone 会级联删除其下所有 Domain 和 CoreDNS 记录
+9. Domain 的 `ips` 字段在更新时会**完全替换**原有 IP 列表

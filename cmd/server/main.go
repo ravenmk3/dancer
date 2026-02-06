@@ -20,14 +20,14 @@ import (
 func main() {
 	// 打印青色 ASCII Logo（最先显示）
 	fmt.Println("\033[36m")
-	fmt.Println("    ██████╗  █████╗ ███╗   ██╗ ██████╗███████╗██████╗ ")
-	fmt.Println("    ██╔══██╗██╔══██╗████╗  ██║██╔════╝██╔════╝██╔══██╗")
-	fmt.Println("    ██║  ██║███████║██╔██╗ ██║██║     █████╗  ██████╔╝")
-	fmt.Println("    ██║  ██║██╔══██║██║╚██╗██║██║     ██╔══╝  ██╔══██╗")
-	fmt.Println("    ██████╔╝██║  ██║██║ ╚████║╚██████╗███████╗██║  ██║")
-	fmt.Println("    ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚══════╝╚═╝  ╚═╝")
+	fmt.Println("    ██████╗  █████╗ ███╗   ██╗ ██████╗███████╗███████╗██████╗ ")
+	fmt.Println("    ██╔══██╗██╔══██╗████╗  ██║██╔════╝██╔════╝██╔══██╗██╔══██╗")
+	fmt.Println("    ██║  ██║███████║██╔██╗ ██║██║     █████╗  ██████╔╝██████╔╝")
+	fmt.Println("    ██║  ██║██╔══██║██║╚██╗██║██║     ██╔══╝  ██╔══██╗██╔═══╝ ")
+	fmt.Println("    ██████╔╝██║  ██║██║ ╚████║╚██████╗███████╗██║  ██║██║     ")
+	fmt.Println("    ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚══════╝╚═╝  ╚═╝╚═╝     ")
 	fmt.Println("\033[0m")
-	fmt.Println("         DNS Management Tool")
+	fmt.Println("         DNS Management Tool for CoreDNS")
 	fmt.Println()
 
 	// 命令行参数
@@ -70,11 +70,13 @@ func main() {
 
 	// 初始化存储层
 	userStorage := etcd.NewUserStorage(etcdClient)
-	dnsStorage := etcd.NewDNSStorage(etcdClient)
+	zoneStorage := etcd.NewZoneStorage(etcdClient)
+	domainStorage := etcd.NewDomainStorage(etcdClient, cfg)
 
 	// 初始化服务层
 	userService := services.NewUserService(userStorage)
-	dnsService := services.NewDNSService(dnsStorage)
+	zoneService := services.NewZoneService(zoneStorage, domainStorage)
+	domainService := services.NewDomainService(zoneStorage, domainStorage)
 
 	// 初始化默认管理员（在后台 goroutine 中执行，避免阻塞启动）
 	go func() {
@@ -92,11 +94,12 @@ func main() {
 
 	// 初始化处理器
 	userHandler := handlers.NewUserHandler(userService)
-	dnsHandler := handlers.NewDNSHandler(dnsService)
+	zoneHandler := handlers.NewZoneHandler(zoneService)
+	domainHandler := handlers.NewDomainHandler(domainService)
 	healthHandler := handlers.NewHealthHandler(etcdClient)
 
 	// 初始化路由
-	e := router.New(userHandler, dnsHandler, healthHandler)
+	e := router.New(userHandler, zoneHandler, domainHandler, healthHandler)
 
 	// 启动服务器
 	go func() {

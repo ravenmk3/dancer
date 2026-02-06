@@ -15,4 +15,12 @@ var (
 	ErrForbidden          = errors.New("forbidden")
 	ErrInvalidInput       = errors.New("invalid input")
 	ErrEtcdUnavailable    = errors.New("etcd service temporarily unavailable")
+
+	// Zone 相关错误
+	ErrZoneNotFound = errors.New("zone not found")
+	ErrZoneExists   = errors.New("zone already exists")
+
+	// Domain 相关错误
+	ErrDomainNotFound = errors.New("domain not found")
+	ErrDomainExists   = errors.New("domain already exists")
 )

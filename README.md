@@ -14,8 +14,10 @@
 
 - 🔐 **JWT 认证** - HS256 签名，支持 Token 刷新
 - 👥 **RBAC 权限** - Admin / Normal 角色分离
-- 📝 **DNS 管理** - CRUD 操作，完美适配 CoreDNS etcd 格式
-- 🗄️ **etcd 存储** - 分布式高可用，域名存储
+- 📝 **Zone/Domain 管理** - 清晰的二级域名和子域名管理
+- 🔄 **自动 CoreDNS 同步** - 修改记录自动同步到 CoreDNS etcd 格式
+- 🗄️ **etcd 存储** - 分布式高可用，双写机制确保数据一致性
+- ⚙️ **可配置前缀** - CoreDNS etcd key 前缀可自定义（默认 `/skydns`）
 - 🎨 **优雅日志** - logrus + lumberjack，支持轮转
 - ⚡ **高性能** - Echo 框架，极简内存占用
 
@@ -30,7 +32,7 @@ Handler (Echo) → 请求解析/响应封装
     ↓
 Service → 业务逻辑/事务处理
     ↓
-Storage (etcd) → 数据持久化
+Storage (etcd) → 数据持久化 + CoreDNS 同步
 ```
 
 ---
@@ -48,6 +50,8 @@ env = "development"
 
 [etcd]
 endpoints = ["http://localhost:2379"]
+# CoreDNS etcd 插件的 key 前缀，默认 /skydns
+# coredns_prefix = "/skydns"
 
 [jwt]
 secret = "your-256-bit-secret"
@@ -79,7 +83,8 @@ go build -o dancer ./cmd/server
 | `POST /api/me` | 当前用户信息 | JWT |
 | `POST /api/me/change-password` | 修改密码 | JWT |
 | `POST /api/user/*` | 用户管理 | Admin |
-| `POST /api/dns/records/*` | DNS 记录管理 | JWT |
+| `POST /api/dns/zones/*` | Zone (二级域名) 管理 | Admin |
+| `POST /api/dns/domains/*` | Domain (子域名) 管理 | JWT |
 
 ### 认证方式
 
@@ -112,15 +117,37 @@ dancer/
 
 ## 🔧 CoreDNS 集成
 
-Dancer 使用与 CoreDNS etcd 插件兼容的 Key 格式：
+Dancer 使用双写机制确保 CoreDNS 兼容性：
+
+### 存储结构
 
 ```
-/coredns/{反转域名}/{记录名}
+# Dancer 管理数据
+/dancer/zones/example.com              → Zone 元数据
+/dancer/domains/example.com/www        → Domain 元数据（含 IP 列表）
 
-示例：
-  github.com    → /coredns/com/github
-  api.github.com → /coredns/com/github/api
+# CoreDNS 使用数据（可配置前缀，默认 /skydns）
+/skydns/com/example/www/x1             → {"host":"1.1.1.1","ttl":300}
+/skydns/com/example/www/x2             → {"host":"1.1.1.2","ttl":300}
 ```
+
+### CoreDNS 配置示例
+
+```
+example.com {
+    etcd {
+        path /skydns              # 与 dancer 配置一致
+        endpoint http://localhost:2379
+    }
+    cache
+}
+```
+
+### 工作流程
+
+1. **创建/更新 Domain**：系统自动对比新旧 IP 列表，同步到 CoreDNS
+2. **删除 Domain**：级联删除 CoreDNS 记录
+3. **删除 Zone**：级联删除所有 Domain 和 CoreDNS 记录
 
 ---
 
@@ -140,3 +167,57 @@ Dancer 使用与 CoreDNS etcd 插件兼容的 Key 格式：
 - **Password**: `admin123`
 
 ⚠️ **生产环境请立即修改！**
+
+---
+
+## 📖 使用示例
+
+### 1. 创建 Zone (需 Admin)
+
+```bash
+curl -X POST http://localhost:8080/api/dns/zones/create \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"zone":"example.com"}'
+```
+
+### 2. 创建 Domain
+
+```bash
+curl -X POST http://localhost:8080/api/dns/domains/create \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "zone": "example.com",
+    "domain": "www",
+    "ips": ["192.168.1.1", "192.168.1.2"],
+    "ttl": 300
+  }'
+```
+
+### 3. 更新 Domain IP 列表
+
+```bash
+curl -X POST http://localhost:8080/api/dns/domains/update \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "zone": "example.com",
+    "domain": "www",
+    "ips": ["192.168.1.3"],
+    "ttl": 600
+  }'
+```
+
+---
+
+## 📚 文档
+
+- [API 文档](docs/backend-api.md) - 详细的 API 说明
+- [设计文档](docs/backend-design.md) - 架构和设计细节
+
+---
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！

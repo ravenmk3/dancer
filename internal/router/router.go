@@ -22,7 +22,8 @@ type Response struct {
 
 func New(
 	userHandler *handlers.UserHandler,
-	dnsHandler *handlers.DNSHandler,
+	zoneHandler *handlers.ZoneHandler,
+	domainHandler *handlers.DomainHandler,
 	healthHandler *handlers.HealthHandler,
 ) *echo.Echo {
 	e := echo.New()
@@ -72,12 +73,21 @@ func New(
 	user.POST("/update", userHandler.UpdateUser)
 	user.POST("/delete", userHandler.DeleteUser)
 
-	// DNS 记录管理（需要认证）
-	dns := api.Group("/dns/records", auth.JWTMiddleware())
-	dns.POST("/list", dnsHandler.ListRecords)
-	dns.POST("/create", dnsHandler.CreateRecord)
-	dns.POST("/update", dnsHandler.UpdateRecord)
-	dns.POST("/delete", dnsHandler.DeleteRecord)
+	// DNS Zone 管理（需要管理员权限）
+	zones := api.Group("/dns/zones", auth.JWTMiddleware(), auth.RequireAdmin())
+	zones.POST("/list", zoneHandler.ListZones)
+	zones.POST("/get", zoneHandler.GetZone)
+	zones.POST("/create", zoneHandler.CreateZone)
+	zones.POST("/update", zoneHandler.UpdateZone)
+	zones.POST("/delete", zoneHandler.DeleteZone)
+
+	// DNS Domain 管理（需要认证）
+	domains := api.Group("/dns/domains", auth.JWTMiddleware())
+	domains.POST("/list", domainHandler.ListDomains)
+	domains.POST("/get", domainHandler.GetDomain)
+	domains.POST("/create", domainHandler.CreateDomain)
+	domains.POST("/update", domainHandler.UpdateDomain)
+	domains.POST("/delete", domainHandler.DeleteDomain)
 
 	return e
 }
@@ -139,6 +149,30 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 	case errors.Is(err, apperrors.ErrRecordExists):
 		c.JSON(http.StatusConflict, Response{
 			Code:    "record_exists",
+			Message: err.Error(),
+		})
+
+	// Zone 相关错误
+	case errors.Is(err, apperrors.ErrZoneNotFound):
+		c.JSON(http.StatusNotFound, Response{
+			Code:    "zone_not_found",
+			Message: err.Error(),
+		})
+	case errors.Is(err, apperrors.ErrZoneExists):
+		c.JSON(http.StatusConflict, Response{
+			Code:    "zone_exists",
+			Message: err.Error(),
+		})
+
+	// Domain 相关错误
+	case errors.Is(err, apperrors.ErrDomainNotFound):
+		c.JSON(http.StatusNotFound, Response{
+			Code:    "domain_not_found",
+			Message: err.Error(),
+		})
+	case errors.Is(err, apperrors.ErrDomainExists):
+		c.JSON(http.StatusConflict, Response{
+			Code:    "domain_exists",
 			Message: err.Error(),
 		})
 
