@@ -11,7 +11,7 @@ type LoginRequest struct {
 // CreateUserRequest 创建用户请求
 type CreateUserRequest struct {
 	Username string   `json:"username" validate:"required,min=3,max=32"`
-	Password string   `json:"password" validate:"required,min=6"`
+	Password string   `json:"password" validate:"required,min=6,max=72"`
 	UserType UserType `json:"user_type" validate:"required,oneof=admin normal"`
 }
 
@@ -19,7 +19,7 @@ type CreateUserRequest struct {
 type UpdateUserRequest struct {
 	ID       string   `json:"id" validate:"required"`
 	Username string   `json:"username" validate:"omitempty,min=3,max=32"`
-	Password string   `json:"password" validate:"omitempty,min=6"`
+	Password string   `json:"password" validate:"omitempty,min=6,max=72"`
 	UserType UserType `json:"user_type" validate:"omitempty,oneof=admin normal"`
 }
 
@@ -31,7 +31,7 @@ type DeleteUserRequest struct {
 // ChangePasswordRequest 修改密码请求
 type ChangePasswordRequest struct {
 	OldPassword string `json:"old_password" validate:"required"`
-	NewPassword string `json:"new_password" validate:"required,min=6"`
+	NewPassword string `json:"new_password" validate:"required,min=6,max=72"`
 }
 
 // Zone 相关请求
@@ -108,27 +108,46 @@ type LoginResponse struct {
 	Token string `json:"token"`
 }
 
-// UserListResponse 用户列表响应
-type UserListResponse struct {
-	Users []*User `json:"users"`
+// UserDTO 用户 DTO（排除敏感字段）
+type UserDTO struct {
+	ID        string   `json:"id"`
+	Username  string   `json:"username"`
+	UserType  UserType `json:"user_type"`
+	CreatedAt int64    `json:"created_at"`
+	UpdatedAt int64    `json:"updated_at"`
 }
 
-// ZoneListResponse Zone 列表响应
-type ZoneListResponse struct {
-	Zones []*Zone `json:"zones"`
+// UserListDTO 用户列表 DTO
+type UserListDTO struct {
+	Users []*UserDTO `json:"users"`
 }
 
-// ZoneResponse Zone 详情响应
-type ZoneResponse struct {
-	Zone *Zone `json:"zone"`
+// ZoneDTO Zone DTO
+type ZoneDTO struct {
+	Zone        string `json:"zone"`
+	RecordCount int    `json:"record_count"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
 }
 
-// DomainListResponse Domain 列表响应
-type DomainListResponse struct {
-	Domains []*Domain `json:"domains"`
+// ZoneListDTO Zone 列表 DTO
+type ZoneListDTO struct {
+	Zones []*ZoneDTO `json:"zones"`
 }
 
-// DomainResponse Domain 详情响应
-type DomainResponse struct {
-	Domain *Domain `json:"domain"`
+// DomainDTO Domain DTO
+type DomainDTO struct {
+	Zone        string   `json:"zone"`
+	Domain      string   `json:"domain"`
+	Name        string   `json:"name"`
+	IPs         []string `json:"ips"`
+	TTL         int      `json:"ttl"`
+	RecordCount int      `json:"record_count"`
+	CreatedAt   int64    `json:"created_at"`
+	UpdatedAt   int64    `json:"updated_at"`
+}
+
+// DomainListDTO Domain 列表 DTO
+type DomainListDTO struct {
+	Domains []*DomainDTO `json:"domains"`
 }

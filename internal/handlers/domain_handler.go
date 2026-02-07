@@ -21,6 +21,20 @@ func NewDomainHandler(domainService *services.DomainService) *DomainHandler {
 	}
 }
 
+// toDomainDTO 将 Domain 实体转换为 DomainDTO
+func toDomainDTO(domain *models.Domain) *models.DomainDTO {
+	return &models.DomainDTO{
+		Zone:        domain.Zone,
+		Domain:      domain.Domain,
+		Name:        domain.Name,
+		IPs:         domain.IPs,
+		TTL:         domain.TTL,
+		RecordCount: domain.RecordCount,
+		CreatedAt:   domain.CreatedAt,
+		UpdatedAt:   domain.UpdatedAt,
+	}
+}
+
 // ListDomains 列出 Zone 下所有 Domain
 func (h *DomainHandler) ListDomains(c echo.Context) error {
 	var req models.ListDomainsRequest
@@ -38,7 +52,13 @@ func (h *DomainHandler) ListDomains(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, &models.DomainListResponse{Domains: domains})
+	// 转换为 DTO
+	dtos := make([]*models.DomainDTO, len(domains))
+	for i, domain := range domains {
+		dtos[i] = toDomainDTO(domain)
+	}
+
+	return c.JSON(200, &models.DomainListDTO{Domains: dtos})
 }
 
 // GetDomain 获取 Domain 详情
@@ -58,7 +78,7 @@ func (h *DomainHandler) GetDomain(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, &models.DomainResponse{Domain: domain})
+	return c.JSON(200, toDomainDTO(domain))
 }
 
 // CreateDomain 创建 Domain
@@ -78,7 +98,7 @@ func (h *DomainHandler) CreateDomain(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, &models.DomainResponse{Domain: domain})
+	return c.JSON(200, toDomainDTO(domain))
 }
 
 // UpdateDomain 更新 Domain
@@ -98,7 +118,7 @@ func (h *DomainHandler) UpdateDomain(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, &models.DomainResponse{Domain: domain})
+	return c.JSON(200, toDomainDTO(domain))
 }
 
 // DeleteDomain 删除 Domain

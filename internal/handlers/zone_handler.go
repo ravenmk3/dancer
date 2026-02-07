@@ -21,6 +21,16 @@ func NewZoneHandler(zoneService *services.ZoneService) *ZoneHandler {
 	}
 }
 
+// toZoneDTO 将 Zone 实体转换为 ZoneDTO
+func toZoneDTO(zone *models.Zone) *models.ZoneDTO {
+	return &models.ZoneDTO{
+		Zone:        zone.Zone,
+		RecordCount: zone.RecordCount,
+		CreatedAt:   zone.CreatedAt,
+		UpdatedAt:   zone.UpdatedAt,
+	}
+}
+
 // ListZones 列出所有 Zone
 func (h *ZoneHandler) ListZones(c echo.Context) error {
 	zones, err := h.zoneService.ListZones(c.Request().Context())
@@ -29,7 +39,13 @@ func (h *ZoneHandler) ListZones(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, &models.ZoneListResponse{Zones: zones})
+	// 转换为 DTO
+	dtos := make([]*models.ZoneDTO, len(zones))
+	for i, zone := range zones {
+		dtos[i] = toZoneDTO(zone)
+	}
+
+	return c.JSON(200, &models.ZoneListDTO{Zones: dtos})
 }
 
 // GetZone 获取 Zone 详情
@@ -49,7 +65,7 @@ func (h *ZoneHandler) GetZone(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, &models.ZoneResponse{Zone: zone})
+	return c.JSON(200, toZoneDTO(zone))
 }
 
 // CreateZone 创建 Zone
@@ -69,7 +85,7 @@ func (h *ZoneHandler) CreateZone(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, &models.ZoneResponse{Zone: zone})
+	return c.JSON(200, toZoneDTO(zone))
 }
 
 // UpdateZone 更新 Zone
@@ -89,7 +105,7 @@ func (h *ZoneHandler) UpdateZone(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, &models.ZoneResponse{Zone: zone})
+	return c.JSON(200, toZoneDTO(zone))
 }
 
 // DeleteZone 删除 Zone

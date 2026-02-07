@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"dancer/internal/logger"
 	"dancer/internal/models"
 	"dancer/internal/storage/etcd"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
@@ -97,6 +99,9 @@ func (s *UserService) ChangePassword(ctx context.Context, userID, oldPassword, n
 
 	hashedPassword, err := auth.HashPassword(newPassword)
 	if err != nil {
+		if errors.Is(err, bcrypt.ErrPasswordTooLong) {
+			return apperrors.ErrPasswordTooLong
+		}
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
@@ -121,6 +126,9 @@ func (s *UserService) CreateUser(ctx context.Context, req *models.CreateUserRequ
 
 	hashedPassword, err := auth.HashPassword(req.Password)
 	if err != nil {
+		if errors.Is(err, bcrypt.ErrPasswordTooLong) {
+			return nil, apperrors.ErrPasswordTooLong
+		}
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
@@ -160,6 +168,9 @@ func (s *UserService) UpdateUser(ctx context.Context, req *models.UpdateUserRequ
 	if req.Password != "" {
 		hashedPassword, err := auth.HashPassword(req.Password)
 		if err != nil {
+			if errors.Is(err, bcrypt.ErrPasswordTooLong) {
+				return apperrors.ErrPasswordTooLong
+			}
 			return fmt.Errorf("failed to hash password: %w", err)
 		}
 		user.Password = hashedPassword

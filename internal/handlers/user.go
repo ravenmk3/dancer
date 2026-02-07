@@ -22,6 +22,17 @@ func NewUserHandler(userService *services.UserService) *UserHandler {
 	}
 }
 
+// toUserDTO 将 User 转换为 UserDTO（排除 password 字段）
+func toUserDTO(user *models.User) *models.UserDTO {
+	return &models.UserDTO{
+		ID:        user.ID,
+		Username:  user.Username,
+		UserType:  user.UserType,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+}
+
 // Login 用户登录
 func (h *UserHandler) Login(c echo.Context) error {
 	var req models.LoginRequest
@@ -69,7 +80,7 @@ func (h *UserHandler) GetCurrentUser(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, user)
+	return c.JSON(200, toUserDTO(user))
 }
 
 // ChangePassword 修改当前用户密码
@@ -102,7 +113,13 @@ func (h *UserHandler) ListUsers(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, &models.UserListResponse{Users: users})
+	// 转换用户列表，排除 password 字段
+	responses := make([]*models.UserDTO, len(users))
+	for i, user := range users {
+		responses[i] = toUserDTO(user)
+	}
+
+	return c.JSON(200, &models.UserListDTO{Users: responses})
 }
 
 // CreateUser 创建用户（Admin）
@@ -121,7 +138,7 @@ func (h *UserHandler) CreateUser(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, user)
+	return c.JSON(200, toUserDTO(user))
 }
 
 // UpdateUser 更新用户（Admin）

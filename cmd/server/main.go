@@ -62,12 +62,6 @@ func main() {
 	}
 	defer etcdClient.Close()
 
-	if etcdClient.IsConnected() {
-		logger.Log.Info("Connected to etcd")
-	} else {
-		logger.Log.Warn("Etcd not connected, will retry in background")
-	}
-
 	// 初始化存储层
 	userStorage := etcd.NewUserStorage(etcdClient)
 	zoneStorage := etcd.NewZoneStorage(etcdClient)

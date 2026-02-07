@@ -193,6 +193,12 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 			Code:    "forbidden",
 			Message: err.Error(),
 		})
+	// 密码过长错误（需要在 ErrInvalidInput 之前检查）
+	case errors.Is(err, apperrors.ErrPasswordTooLong):
+		c.JSON(http.StatusBadRequest, Response{
+			Code:    "invalid_input",
+			Message: "password exceeds maximum length of 72 bytes",
+		})
 	case errors.Is(err, apperrors.ErrInvalidInput):
 		c.JSON(http.StatusBadRequest, Response{
 			Code:    "invalid_input",

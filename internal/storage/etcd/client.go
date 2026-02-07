@@ -54,11 +54,9 @@ func NewClient(cfg *config.Config) (*Client, error) {
 
 // initialConnection 首次连接尝试
 func (c *Client) initialConnection() {
-	if err := c.tryConnect(); err != nil {
-		logger.Log.WithError(err).Warn("Initial etcd connection failed, will retry in background")
-	} else {
-		logger.Log.Info("Initial etcd connection established")
-	}
+	// 静默尝试首次连接，不打印任何日志
+	// 实际连接日志在 connectLoop 中打印
+	c.tryConnect()
 }
 
 // getDialTimeout 获取连接超时时间
@@ -143,7 +141,7 @@ func (c *Client) connectLoop() {
 				continue
 			}
 
-			logger.Log.Infof("Attempting to connect to etcd (interval: %v)", currentInterval)
+			logger.Log.Info("Connecting to etcd")
 
 			if err := c.tryConnect(); err != nil {
 				logger.Log.WithError(err).Error("Etcd connection failed")

@@ -26,4 +26,7 @@ var (
 
 	// 其他业务错误
 	ErrCannotDeleteDefaultAdmin = errors.New("cannot delete default admin user")
+
+	// 密码相关错误
+	ErrPasswordTooLong = errors.New("password exceeds maximum length of 72 bytes")
 )
