@@ -29,4 +29,5 @@ var (
 
 	// 密码相关错误
 	ErrPasswordTooLong = errors.New("password exceeds maximum length of 72 bytes")
+	ErrSamePassword    = errors.New("new password cannot be the same as old password")
 )

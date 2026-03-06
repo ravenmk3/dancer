@@ -155,6 +155,11 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 			Code:    "wrong_password",
 			Message: err.Error(),
 		})
+	case errors.Is(err, apperrors.ErrSamePassword):
+		c.JSON(http.StatusBadRequest, Response{
+			Code:    "same_password",
+			Message: err.Error(),
+		})
 
 	// DNS 记录相关错误
 	case errors.Is(err, apperrors.ErrRecordNotFound):

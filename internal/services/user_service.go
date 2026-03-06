@@ -97,6 +97,11 @@ func (s *UserService) ChangePassword(ctx context.Context, userID, oldPassword, n
 		return apperrors.ErrWrongPassword
 	}
 
+	// 检查新密码是否与旧密码相同
+	if auth.CheckPassword(newPassword, user.Password) {
+		return apperrors.ErrSamePassword
+	}
+
 	hashedPassword, err := auth.HashPassword(newPassword)
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrPasswordTooLong) {
