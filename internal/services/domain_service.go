@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"dancer/internal/errors"
@@ -24,6 +25,9 @@ func NewDomainService(zoneStorage *etcd.ZoneStorage, domainStorage *etcd.DomainS
 
 // ListDomains 列出 Zone 下所有 Domain
 func (s *DomainService) ListDomains(ctx context.Context, req *models.ListDomainsRequest) ([]*models.Domain, error) {
+	// 转换为小写
+	req.Zone = strings.ToLower(req.Zone)
+
 	// 检查 Zone 是否存在
 	_, err := s.zoneStorage.GetZone(ctx, req.Zone)
 	if err != nil {
@@ -35,6 +39,10 @@ func (s *DomainService) ListDomains(ctx context.Context, req *models.ListDomains
 
 // GetDomain 获取 Domain 详情
 func (s *DomainService) GetDomain(ctx context.Context, req *models.GetDomainRequest) (*models.Domain, error) {
+	// 转换为小写
+	req.Zone = strings.ToLower(req.Zone)
+	req.Domain = strings.ToLower(req.Domain)
+
 	// 检查 Zone 是否存在
 	_, err := s.zoneStorage.GetZone(ctx, req.Zone)
 	if err != nil {
@@ -46,6 +54,10 @@ func (s *DomainService) GetDomain(ctx context.Context, req *models.GetDomainRequ
 
 // CreateDomain 创建 Domain
 func (s *DomainService) CreateDomain(ctx context.Context, req *models.CreateDomainRequest) (*models.Domain, error) {
+	// 转换为小写
+	req.Zone = strings.ToLower(req.Zone)
+	req.Domain = strings.ToLower(req.Domain)
+
 	// 检查 Zone 是否存在
 	_, err := s.zoneStorage.GetZone(ctx, req.Zone)
 	if err != nil {
@@ -81,6 +93,10 @@ func (s *DomainService) CreateDomain(ctx context.Context, req *models.CreateDoma
 
 // UpdateDomain 更新 Domain
 func (s *DomainService) UpdateDomain(ctx context.Context, req *models.UpdateDomainRequest) (*models.Domain, error) {
+	// 转换为小写
+	req.Zone = strings.ToLower(req.Zone)
+	req.Domain = strings.ToLower(req.Domain)
+
 	// 检查 Zone 是否存在
 	_, err := s.zoneStorage.GetZone(ctx, req.Zone)
 	if err != nil {
@@ -109,6 +125,10 @@ func (s *DomainService) UpdateDomain(ctx context.Context, req *models.UpdateDoma
 
 // DeleteDomain 删除 Domain
 func (s *DomainService) DeleteDomain(ctx context.Context, req *models.DeleteDomainRequest) error {
+	// 转换为小写
+	req.Zone = strings.ToLower(req.Zone)
+	req.Domain = strings.ToLower(req.Domain)
+
 	// 检查 Zone 是否存在
 	_, err := s.zoneStorage.GetZone(ctx, req.Zone)
 	if err != nil {

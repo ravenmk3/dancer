@@ -43,7 +43,7 @@ func (h *DomainHandler) ListDomains(c echo.Context) error {
 	}
 
 	if err := h.validate.Struct(req); err != nil {
-		return err
+		return handleValidationError(err)
 	}
 
 	domains, err := h.domainService.ListDomains(c.Request().Context(), &req)
@@ -69,7 +69,7 @@ func (h *DomainHandler) GetDomain(c echo.Context) error {
 	}
 
 	if err := h.validate.Struct(req); err != nil {
-		return err
+		return handleValidationError(err)
 	}
 
 	domain, err := h.domainService.GetDomain(c.Request().Context(), &req)
@@ -89,7 +89,7 @@ func (h *DomainHandler) CreateDomain(c echo.Context) error {
 	}
 
 	if err := h.validate.Struct(req); err != nil {
-		return err
+		return handleValidationError(err)
 	}
 
 	domain, err := h.domainService.CreateDomain(c.Request().Context(), &req)
@@ -109,7 +109,7 @@ func (h *DomainHandler) UpdateDomain(c echo.Context) error {
 	}
 
 	if err := h.validate.Struct(req); err != nil {
-		return err
+		return handleValidationError(err)
 	}
 
 	domain, err := h.domainService.UpdateDomain(c.Request().Context(), &req)
@@ -129,7 +129,7 @@ func (h *DomainHandler) DeleteDomain(c echo.Context) error {
 	}
 
 	if err := h.validate.Struct(req); err != nil {
-		return err
+		return handleValidationError(err)
 	}
 
 	if err := h.domainService.DeleteDomain(c.Request().Context(), &req); err != nil {

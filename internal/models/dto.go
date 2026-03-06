@@ -41,40 +41,40 @@ type ListZonesRequest struct{}
 
 // GetZoneRequest 获取 Zone 详情请求
 type GetZoneRequest struct {
-	Zone string `json:"zone" validate:"required,fqdn"`
+	Zone string `json:"zone" validate:"required,min=1,max=253,hostname_rfc1123"`
 }
 
 // CreateZoneRequest 创建 Zone 请求
 type CreateZoneRequest struct {
-	Zone string `json:"zone" validate:"required,fqdn"`
+	Zone string `json:"zone" validate:"required,min=1,max=253,hostname_rfc1123"`
 }
 
 // UpdateZoneRequest 更新 Zone 请求
 type UpdateZoneRequest struct {
-	Zone string `json:"zone" validate:"required,fqdn"`
+	Zone string `json:"zone" validate:"required,min=1,max=253,hostname_rfc1123"`
 }
 
 // DeleteZoneRequest 删除 Zone 请求
 type DeleteZoneRequest struct {
-	Zone string `json:"zone" validate:"required,fqdn"`
+	Zone string `json:"zone" validate:"required,min=1,max=253,hostname_rfc1123"`
 }
 
 // Domain 相关请求
 
 // ListDomainsRequest 列出 Zone 下所有 Domain 请求
 type ListDomainsRequest struct {
-	Zone string `json:"zone" validate:"required,fqdn"`
+	Zone string `json:"zone" validate:"required,min=1,max=253,hostname_rfc1123"`
 }
 
 // GetDomainRequest 获取 Domain 详情请求
 type GetDomainRequest struct {
-	Zone   string `json:"zone" validate:"required,fqdn"`
+	Zone   string `json:"zone" validate:"required,min=1,max=253,hostname_rfc1123"`
 	Domain string `json:"domain" validate:"required"`
 }
 
 // CreateDomainRequest 创建 Domain 请求
 type CreateDomainRequest struct {
-	Zone   string   `json:"zone" validate:"required,fqdn"`
+	Zone   string   `json:"zone" validate:"required,min=1,max=253,hostname_rfc1123"`
 	Domain string   `json:"domain" validate:"required"`
 	IPs    []string `json:"ips" validate:"required,dive,ip"`
 	TTL    int      `json:"ttl" validate:"required,min=1"`
@@ -82,7 +82,7 @@ type CreateDomainRequest struct {
 
 // UpdateDomainRequest 更新 Domain 请求
 type UpdateDomainRequest struct {
-	Zone   string   `json:"zone" validate:"required,fqdn"`
+	Zone   string   `json:"zone" validate:"required,min=1,max=253,hostname_rfc1123"`
 	Domain string   `json:"domain" validate:"required"`
 	IPs    []string `json:"ips" validate:"required,dive,ip"`
 	TTL    int      `json:"ttl" validate:"omitempty,min=1"`
@@ -90,7 +90,7 @@ type UpdateDomainRequest struct {
 
 // DeleteDomainRequest 删除 Domain 请求
 type DeleteDomainRequest struct {
-	Zone   string `json:"zone" validate:"required,fqdn"`
+	Zone   string `json:"zone" validate:"required,min=1,max=253,hostname_rfc1123"`
 	Domain string `json:"domain" validate:"required"`
 }
 

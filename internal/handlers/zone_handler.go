@@ -56,7 +56,7 @@ func (h *ZoneHandler) GetZone(c echo.Context) error {
 	}
 
 	if err := h.validate.Struct(req); err != nil {
-		return err
+		return handleValidationError(err)
 	}
 
 	zone, err := h.zoneService.GetZone(c.Request().Context(), req.Zone)
@@ -76,7 +76,7 @@ func (h *ZoneHandler) CreateZone(c echo.Context) error {
 	}
 
 	if err := h.validate.Struct(req); err != nil {
-		return err
+		return handleValidationError(err)
 	}
 
 	zone, err := h.zoneService.CreateZone(c.Request().Context(), &req)
@@ -96,7 +96,7 @@ func (h *ZoneHandler) UpdateZone(c echo.Context) error {
 	}
 
 	if err := h.validate.Struct(req); err != nil {
-		return err
+		return handleValidationError(err)
 	}
 
 	zone, err := h.zoneService.UpdateZone(c.Request().Context(), &req)
@@ -116,7 +116,7 @@ func (h *ZoneHandler) DeleteZone(c echo.Context) error {
 	}
 
 	if err := h.validate.Struct(req); err != nil {
-		return err
+		return handleValidationError(err)
 	}
 
 	if err := h.zoneService.DeleteZone(c.Request().Context(), &req); err != nil {
