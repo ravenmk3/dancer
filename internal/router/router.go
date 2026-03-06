@@ -93,11 +93,31 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 	// 处理 echo 的 HTTPError
 	var httpErr *echo.HTTPError
 	if errors.As(err, &httpErr) {
-		c.JSON(httpErr.Code, Response{
-			Code:    "http_error",
-			Message: httpErr.Error(),
-		})
-		return
+		// 检查 Message 是否包含业务错误
+		if innerErr, ok := httpErr.Message.(error); ok {
+			// 检查是否是已知的业务错误
+			switch {
+			case errors.Is(innerErr, apperrors.ErrInvalidToken),
+				errors.Is(innerErr, apperrors.ErrTokenExpired),
+				errors.Is(innerErr, apperrors.ErrUnauthorized),
+				errors.Is(innerErr, apperrors.ErrForbidden):
+				// 是认证相关的业务错误，提取后让 switch-case 处理
+				err = innerErr
+				// 继续执行，不 return
+			default:
+				// 其他业务错误也尝试让 switch-case 处理
+				err = innerErr
+			}
+		} else {
+			// Message 不是 error 类型（如 Echo 框架的绑定错误），保持原有行为
+			c.JSON(httpErr.Code, Response{
+				Code:    "http_error",
+				Message: httpErr.Error(),
+			})
+			return
+		}
+	} else {
+		// 不是 HTTPError，继续执行 switch-case
 	}
 
 	// 业务错误映射
