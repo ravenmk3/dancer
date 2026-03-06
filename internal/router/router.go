@@ -90,152 +90,35 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 		return
 	}
 
-	// 处理 echo 的 HTTPError
+	// 尝试从 echo.HTTPError 中提取内部错误
 	var httpErr *echo.HTTPError
 	if errors.As(err, &httpErr) {
-		// 检查 Message 是否包含业务错误
 		if innerErr, ok := httpErr.Message.(error); ok {
-			// 检查是否是已知的业务错误
-			switch {
-			case errors.Is(innerErr, apperrors.ErrInvalidToken),
-				errors.Is(innerErr, apperrors.ErrTokenExpired),
-				errors.Is(innerErr, apperrors.ErrUnauthorized),
-				errors.Is(innerErr, apperrors.ErrForbidden):
-				// 是认证相关的业务错误，提取后让 switch-case 处理
-				err = innerErr
-				// 继续执行，不 return
-			default:
-				// 其他业务错误也尝试让 switch-case 处理
-				err = innerErr
-			}
+			err = innerErr
 		} else {
-			// Message 不是 error 类型（如 Echo 框架的绑定错误），保持原有行为
+			// Message 不是 error 类型，直接返回 HTTP 错误
 			c.JSON(httpErr.Code, Response{
 				Code:    "http_error",
 				Message: httpErr.Error(),
 			})
 			return
 		}
-	} else {
-		// 不是 HTTPError，继续执行 switch-case
 	}
 
-	// 业务错误映射
-	switch {
-	// etcd 不可用
-	case errors.Is(err, apperrors.ErrEtcdUnavailable):
-		c.JSON(http.StatusServiceUnavailable, Response{
-			Code:    "service_unavailable",
-			Message: "etcd service temporarily unavailable, please retry later",
+	// 检查是否是业务错误
+	var bizErr apperrors.BusinessError
+	if errors.As(err, &bizErr) {
+		c.JSON(bizErr.Status(), Response{
+			Code:    bizErr.Code(),
+			Message: bizErr.Error(),
 		})
-
-	// 用户相关错误
-	case errors.Is(err, apperrors.ErrUserNotFound):
-		c.JSON(http.StatusNotFound, Response{
-			Code:    "user_not_found",
-			Message: err.Error(),
-		})
-	case errors.Is(err, apperrors.ErrUserExists):
-		c.JSON(http.StatusConflict, Response{
-			Code:    "user_exists",
-			Message: err.Error(),
-		})
-	case errors.Is(err, apperrors.ErrCannotDeleteDefaultAdmin):
-		c.JSON(http.StatusForbidden, Response{
-			Code:    "cannot_delete_default_admin",
-			Message: err.Error(),
-		})
-	case errors.Is(err, apperrors.ErrInvalidCredentials):
-		c.JSON(http.StatusUnauthorized, Response{
-			Code:    "invalid_credentials",
-			Message: err.Error(),
-		})
-	case errors.Is(err, apperrors.ErrWrongPassword):
-		c.JSON(http.StatusBadRequest, Response{
-			Code:    "wrong_password",
-			Message: err.Error(),
-		})
-	case errors.Is(err, apperrors.ErrSamePassword):
-		c.JSON(http.StatusBadRequest, Response{
-			Code:    "same_password",
-			Message: err.Error(),
-		})
-
-	// DNS 记录相关错误
-	case errors.Is(err, apperrors.ErrRecordNotFound):
-		c.JSON(http.StatusNotFound, Response{
-			Code:    "record_not_found",
-			Message: err.Error(),
-		})
-	case errors.Is(err, apperrors.ErrRecordExists):
-		c.JSON(http.StatusConflict, Response{
-			Code:    "record_exists",
-			Message: err.Error(),
-		})
-
-	// Zone 相关错误
-	case errors.Is(err, apperrors.ErrZoneNotFound):
-		c.JSON(http.StatusNotFound, Response{
-			Code:    "zone_not_found",
-			Message: err.Error(),
-		})
-	case errors.Is(err, apperrors.ErrZoneExists):
-		c.JSON(http.StatusConflict, Response{
-			Code:    "zone_exists",
-			Message: err.Error(),
-		})
-
-	// Domain 相关错误
-	case errors.Is(err, apperrors.ErrDomainNotFound):
-		c.JSON(http.StatusNotFound, Response{
-			Code:    "domain_not_found",
-			Message: err.Error(),
-		})
-	case errors.Is(err, apperrors.ErrDomainExists):
-		c.JSON(http.StatusConflict, Response{
-			Code:    "domain_exists",
-			Message: err.Error(),
-		})
-
-	// 认证授权错误
-	case errors.Is(err, apperrors.ErrInvalidToken):
-		c.JSON(http.StatusUnauthorized, Response{
-			Code:    "invalid_token",
-			Message: err.Error(),
-		})
-	case errors.Is(err, apperrors.ErrTokenExpired):
-		c.JSON(http.StatusUnauthorized, Response{
-			Code:    "token_expired",
-			Message: err.Error(),
-		})
-	case errors.Is(err, apperrors.ErrUnauthorized):
-		c.JSON(http.StatusUnauthorized, Response{
-			Code:    "unauthorized",
-			Message: err.Error(),
-		})
-	case errors.Is(err, apperrors.ErrForbidden):
-		c.JSON(http.StatusForbidden, Response{
-			Code:    "forbidden",
-			Message: err.Error(),
-		})
-	// 密码过长错误（需要在 ErrInvalidInput 之前检查）
-	case errors.Is(err, apperrors.ErrPasswordTooLong):
-		c.JSON(http.StatusBadRequest, Response{
-			Code:    "invalid_input",
-			Message: "password exceeds maximum length of 72 bytes",
-		})
-	case errors.Is(err, apperrors.ErrInvalidInput):
-		c.JSON(http.StatusBadRequest, Response{
-			Code:    "invalid_input",
-			Message: err.Error(),
-		})
+		return
+	}
 
 	// 未知错误
-	default:
-		logger.Log.WithError(err).Error("Unhandled error")
-		c.JSON(http.StatusInternalServerError, Response{
-			Code:    "internal_error",
-			Message: "internal server error",
-		})
-	}
+	logger.Log.WithError(err).Error("Unhandled error")
+	c.JSON(http.StatusInternalServerError, Response{
+		Code:    "internal_error",
+		Message: "internal server error",
+	})
 }
