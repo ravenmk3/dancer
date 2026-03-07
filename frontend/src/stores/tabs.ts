@@ -10,7 +10,11 @@ export interface Tab {
   closable: boolean
   icon?: string
   cached: boolean
+  fixed?: boolean
 }
+
+// Fixed tabs that cannot be closed
+const FIXED_TABS = ['/dashboard']
 
 export const useTabsStore = defineStore('tabs', () => {
   // State
@@ -22,15 +26,37 @@ export const useTabsStore = defineStore('tabs', () => {
     return tabs.value.find(tab => tab.id === activeTab.value)
   })
 
+  // Initialize with dashboard tab
+  const initDashboardTab = () => {
+    const dashboardTab: Tab = {
+      id: '/dashboard' + JSON.stringify({}),
+      title: '仪表盘',
+      path: '/dashboard',
+      query: {},
+      closable: false,
+      icon: 'DataLine',
+      cached: true,
+      fixed: true
+    }
+    
+    const exists = tabs.value.find(tab => tab.id === dashboardTab.id)
+    if (!exists) {
+      tabs.value.unshift(dashboardTab)
+    }
+  }
+
   // Actions
   const addTab = (route: RouteLocationNormalized) => {
     const { path, query, meta } = route
     const id = path + JSON.stringify(query)
     
-    // Don't add login page or hidden routes
-    if (path === '/login' || meta?.hidden) {
+    // Don't add login page
+    if (path === '/login') {
       return
     }
+
+    // Ensure dashboard exists
+    initDashboardTab()
 
     // Check if tab already exists
     const existingTab = tabs.value.find(tab => tab.id === id)
@@ -39,14 +65,16 @@ export const useTabsStore = defineStore('tabs', () => {
       return
     }
 
+    const isFixed = FIXED_TABS.includes(path)
     const tab: Tab = {
       id,
       title: (meta?.title as string) || '未命名',
       path,
       query: { ...query },
-      closable: path !== '/dashboard',
+      closable: !isFixed,
       icon: meta?.icon as string,
-      cached: meta?.keepAlive !== false
+      cached: meta?.keepAlive !== false,
+      fixed: isFixed
     }
 
     tabs.value.push(tab)
@@ -54,6 +82,10 @@ export const useTabsStore = defineStore('tabs', () => {
   }
 
   const removeTab = (id: string) => {
+    const tab = tabs.value.find(tab => tab.id === id)
+    // Cannot remove fixed tabs
+    if (!tab || tab.fixed || !tab.closable) return
+
     const index = tabs.value.findIndex(tab => tab.id === id)
     if (index === -1) return
 
@@ -70,13 +102,18 @@ export const useTabsStore = defineStore('tabs', () => {
   const closeOthers = (id: string) => {
     const current = tabs.value.find(tab => tab.id === id)
     if (!current) return
-    tabs.value = [current]
+    
+    // Keep fixed tabs and current tab
+    tabs.value = tabs.value.filter(tab => tab.fixed || tab.id === id)
     activeTab.value = id
   }
 
   const closeAll = () => {
-    tabs.value = []
-    activeTab.value = ''
+    // Only keep fixed tabs
+    tabs.value = tabs.value.filter(tab => tab.fixed)
+    if (tabs.value.length > 0) {
+      activeTab.value = tabs.value[0].id
+    }
   }
 
   const setActiveTab = (id: string) => {
@@ -103,6 +140,7 @@ export const useTabsStore = defineStore('tabs', () => {
     closeOthers,
     closeAll,
     setActiveTab,
-    refreshTab
+    refreshTab,
+    initDashboardTab
   }
 })

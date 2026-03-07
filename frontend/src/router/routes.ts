@@ -56,13 +56,13 @@ export const constantRoutes: AppRouteRecordRaw[] = [
   {
     path: '/profile',
     component: AppLayout,
-    meta: { hidden: true, requiresAuth: true },
+    meta: { title: '个人中心', icon: 'User', requiresAuth: true },
     children: [
       {
         path: '',
         name: 'Profile',
         component: () => import('@/views/profile/index.vue'),
-        meta: { title: '个人中心', requiresAuth: true }
+        meta: { title: '个人中心', icon: 'User', requiresAuth: true }
       }
     ]
   },

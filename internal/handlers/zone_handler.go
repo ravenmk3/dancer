@@ -45,7 +45,11 @@ func (h *ZoneHandler) ListZones(c echo.Context) error {
 		dtos[i] = toZoneDTO(zone)
 	}
 
-	return c.JSON(200, &models.ZoneListDTO{Zones: dtos})
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "success",
+		Data:    &models.ZoneListDTO{Zones: dtos},
+	})
 }
 
 // GetZone 获取 Zone 详情
@@ -65,7 +69,11 @@ func (h *ZoneHandler) GetZone(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, toZoneDTO(zone))
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "success",
+		Data:    toZoneDTO(zone),
+	})
 }
 
 // CreateZone 创建 Zone
@@ -85,7 +93,11 @@ func (h *ZoneHandler) CreateZone(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, toZoneDTO(zone))
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "Zone created successfully",
+		Data:    toZoneDTO(zone),
+	})
 }
 
 // UpdateZone 更新 Zone
@@ -105,7 +117,11 @@ func (h *ZoneHandler) UpdateZone(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, toZoneDTO(zone))
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "Zone updated successfully",
+		Data:    toZoneDTO(zone),
+	})
 }
 
 // DeleteZone 删除 Zone

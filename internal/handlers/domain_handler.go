@@ -58,7 +58,11 @@ func (h *DomainHandler) ListDomains(c echo.Context) error {
 		dtos[i] = toDomainDTO(domain)
 	}
 
-	return c.JSON(200, &models.DomainListDTO{Domains: dtos})
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "success",
+		Data:    &models.DomainListDTO{Domains: dtos},
+	})
 }
 
 // GetDomain 获取 Domain 详情
@@ -78,7 +82,11 @@ func (h *DomainHandler) GetDomain(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, toDomainDTO(domain))
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "success",
+		Data:    toDomainDTO(domain),
+	})
 }
 
 // CreateDomain 创建 Domain
@@ -98,7 +106,11 @@ func (h *DomainHandler) CreateDomain(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, toDomainDTO(domain))
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "Domain created successfully",
+		Data:    toDomainDTO(domain),
+	})
 }
 
 // UpdateDomain 更新 Domain
@@ -118,7 +130,11 @@ func (h *DomainHandler) UpdateDomain(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, toDomainDTO(domain))
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "Domain updated successfully",
+		Data:    toDomainDTO(domain),
+	})
 }
 
 // DeleteDomain 删除 Domain

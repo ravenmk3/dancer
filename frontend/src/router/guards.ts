@@ -47,6 +47,11 @@ export function setupRouterGuard(router: Router) {
       }
     }
 
+    // Initialize dashboard tab on first auth required route
+    if (to.meta?.requiresAuth && tabsStore.tabs.length === 0) {
+      tabsStore.initDashboardTab()
+    }
+
     // Add tab
     tabsStore.addTab(to)
 
@@ -59,7 +64,7 @@ export function setupRouterGuard(router: Router) {
     // Set page title
     const title = to.meta?.title as string
     if (title) {
-      document.title = `${title} - Dancer DNS`
+      document.title = `${title} - Dancer`
     }
   })
 }

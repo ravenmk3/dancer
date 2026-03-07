@@ -2,43 +2,44 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getZoneListApi } from '@/api/zone'
-import { getDomainListApi } from '@/api/domain'
+import { getUserListApi } from '@/api/user'
 import type { Zone } from '@/types/zone'
-import type { Domain } from '@/types/domain'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 const zoneCount = ref(0)
 const domainCount = ref(0)
+const userCount = ref(0)
 const loading = ref(false)
 
 const stats = ref([
   { title: 'Zone 数量', value: 0, icon: 'Folder', color: '#409EFF' },
   { title: 'Domain 数量', value: 0, icon: 'Document', color: '#67C23A' },
-  { title: '用户类型', value: '-', icon: 'User', color: '#E6A23C' }
+  { title: '用户数量', value: 0, icon: 'UserFilled', color: '#E6A23C' }
 ])
 
 const fetchStats = async () => {
   loading.value = true
   try {
-    const [zoneRes, domainRes] = await Promise.all([
+    // 并行获取 Zone 和用户列表
+    const [zoneRes, userRes] = await Promise.all([
       getZoneListApi().catch(() => ({ zones: [] })),
-      Promise.all(
-        (await getZoneListApi().catch(() => ({ zones: [] }))).zones.map(z => 
-          getDomainListApi(z.zone).catch(() => ({ domains: [] }))
-        )
-      ).catch(() => [])
+      getUserListApi().catch(() => ({ users: [] }))
     ])
     
     const zones = zoneRes.zones || []
-    const domains = domainRes.flatMap((r: any) => r.domains || [])
+    const users = userRes.users || []
+    
+    // 使用 zone 的 record_count 字段统计 domain 数量，避免并发请求
+    const domainCountValue = zones.reduce((sum: number, zone: Zone) => sum + (zone.record_count || 0), 0)
     
     zoneCount.value = zones.length
-    domainCount.value = domains.length
+    domainCount.value = domainCountValue
+    userCount.value = users.length
     
     stats.value[0].value = zoneCount.value
     stats.value[1].value = domainCount.value
-    stats.value[2].value = authStore.userInfo?.user_type === 'admin' ? '管理员' : '普通用户'
+    stats.value[2].value = userCount.value
   } finally {
     loading.value = false
   }
@@ -72,11 +73,11 @@ onMounted(() => {
     <el-card class="welcome-card" shadow="never">
       <template #header>
         <div class="card-header">
-          <span>欢迎使用 Dancer DNS</span>
+          <span>欢迎使用 Dancer</span>
         </div>
       </template>
       <div class="welcome-content">
-        <p>Dancer DNS 是一个基于 etcd 的 DNS 管理工具，专为 CoreDNS 设计。</p>
+        <p>Dancer 是一个基于 etcd 的 DNS 管理工具，专为 CoreDNS 设计。</p>
         <p>您可以通过本系统管理 DNS Zone 和 Domain 记录。</p>
         <el-divider />
         <h4>快速开始</h4>

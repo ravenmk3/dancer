@@ -39,7 +39,8 @@ const formRules = {
         if (!value || value.length === 0 || value.every(ip => !ip)) {
           callback(new Error('至少需要一个 IP 地址'))
         } else {
-          const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/
+          // 更准确的 IP 验证正则，检查每个 octet 是否在 0-255 范围内
+          const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
           const invalidIps = value.filter(ip => ip && !ipRegex.test(ip))
           if (invalidIps.length > 0) {
             callback(new Error(`无效的 IP 地址: ${invalidIps.join(', ')}`))

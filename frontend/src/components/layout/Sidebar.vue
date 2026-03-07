@@ -16,7 +16,7 @@ const isCollapse = computed(() => appStore.sidebarCollapsed)
 
 // Generate menu from routes
 const menus = computed<MenuItem[]>(() => {
-  const generateMenus = (routes: typeof constantRoutes): MenuItem[] => {
+  const generateMenus = (routes: typeof constantRoutes, parentPath = ''): MenuItem[] => {
     const result: MenuItem[] = []
     
     for (const item of routes) {
@@ -25,15 +25,18 @@ const menus = computed<MenuItem[]>(() => {
       // Check permission
       if (item.meta?.permission === 'admin' && !authStore.isAdmin) continue
       
+      // Build full path by combining parent path with current path
+      const fullPath = item.path.startsWith('/') ? item.path : `${parentPath}/${item.path}`
+      
       const menu: MenuItem = {
-        path: item.redirect as string || item.path,
+        path: item.redirect as string || fullPath,
         title: item.meta?.title as string || '',
         icon: item.meta?.icon as string,
         permission: item.meta?.permission as string
       }
       
       if (item.children && item.children.length > 0) {
-        const childMenus = generateMenus(item.children as typeof constantRoutes)
+        const childMenus = generateMenus(item.children as typeof constantRoutes, fullPath)
         if (childMenus.length > 0) {
           menu.children = childMenus
         }
@@ -75,7 +78,6 @@ const isMenuActive = (menu: MenuItem): boolean => {
         :default-active="activeMenu"
         :collapse="isCollapse"
         :collapse-transition="false"
-        router
         background-color="transparent"
         text-color="var(--sidebar-text)"
         active-text-color="var(--el-color-primary)"

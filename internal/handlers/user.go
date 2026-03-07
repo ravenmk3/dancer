@@ -49,8 +49,10 @@ func (h *UserHandler) Login(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, &models.LoginResponse{
-		Token: token,
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "success",
+		Data:    &models.LoginResponse{Token: token},
 	})
 }
 
@@ -80,7 +82,11 @@ func (h *UserHandler) GetCurrentUser(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, toUserDTO(user))
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "success",
+		Data:    toUserDTO(user),
+	})
 }
 
 // ChangePassword 修改当前用户密码
@@ -119,7 +125,11 @@ func (h *UserHandler) ListUsers(c echo.Context) error {
 		responses[i] = toUserDTO(user)
 	}
 
-	return c.JSON(200, &models.UserListDTO{Users: responses})
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "success",
+		Data:    &models.UserListDTO{Users: responses},
+	})
 }
 
 // CreateUser 创建用户（Admin）
@@ -138,7 +148,11 @@ func (h *UserHandler) CreateUser(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, toUserDTO(user))
+	return c.JSON(200, &models.Response{
+		Code:    "success",
+		Message: "user created successfully",
+		Data:    toUserDTO(user),
+	})
 }
 
 // UpdateUser 更新用户（Admin）

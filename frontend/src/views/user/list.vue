@@ -231,8 +231,8 @@ onMounted(() => {
         
         <el-form-item label="用户类型" prop="user_type">
           <el-radio-group v-model="form.user_type">
-            <el-radio label="normal">普通用户</el-radio>
-            <el-radio label="admin">管理员</el-radio>
+            <el-radio value="normal">普通用户</el-radio>
+            <el-radio value="admin">管理员</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
