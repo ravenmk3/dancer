@@ -5,6 +5,9 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import router from './router'
 
+// Import global styles
+import './styles/index.scss'
+
 const app = createApp(App)
 
 // Register all Element Plus icons

@@ -1,0 +1,118 @@
+// Main styles entry
+@import './variables.scss';
+@import './mixins.scss';
+
+// Global styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  height: 100%;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Scrollbar
+html {
+  @include scrollbar;
+}
+
+// Page container
+.page-container {
+  padding: 20px;
+  background-color: var(--app-bg);
+  min-height: 100%;
+}
+
+// Card
+.app-card {
+  background-color: var(--content-bg);
+  border-radius: 8px;
+  padding: 20px;
+  @include card-shadow;
+}
+
+// Page header
+.page-header {
+  @include flex-between;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-color);
+
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+}
+
+// Transitions
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
+// Element Plus overrides
+.el-button {
+  font-weight: 500;
+}
+
+.el-table {
+  background-color: transparent;
+  
+  .el-table__header-wrapper {
+    th {
+      background-color: var(--el-fill-color-light);
+      font-weight: 600;
+    }
+  }
+  
+  [data-theme="dark"] & {
+    --el-table-row-hover-bg-color: var(--el-fill-color);
+    
+    .el-table__header-wrapper th {
+      background-color: var(--el-fill-color);
+    }
+  }
+}
+
+.el-card {
+  border: none;
+  @include card-shadow;
+  
+  [data-theme="dark"] & {
+    background-color: var(--content-bg);
+  }
+}
+
+.el-menu {
+  border-right: none;
+  
+  [data-theme="dark"] & {
+    background-color: transparent;
+  }
+}

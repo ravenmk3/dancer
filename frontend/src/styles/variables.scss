@@ -1,0 +1,66 @@
+// Global CSS Variables
+:root {
+  // Light theme colors
+  --app-bg: #f5f7fa;
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #303133;
+  --sidebar-active-bg: #ecf5ff;
+  --navbar-bg: #ffffff;
+  --content-bg: #ffffff;
+  --border-color: #e4e7ed;
+  --text-primary: #303133;
+  --text-regular: #606266;
+  --text-secondary: #909399;
+  --text-placeholder: #a8abb2;
+}
+
+// Dark theme
+[data-theme="dark"] {
+  --app-bg: #0a0a0a;
+  --sidebar-bg: #141414;
+  --sidebar-text: #e0e0e0;
+  --sidebar-active-bg: #1a1a1a;
+  --navbar-bg: #141414;
+  --content-bg: #1d1d1d;
+  --border-color: #434343;
+  --text-primary: #e0e0e0;
+  --text-regular: #b0b0b0;
+  --text-secondary: #808080;
+  --text-placeholder: #606060;
+}
+
+// Element Plus theme override
+:root {
+  --el-color-primary: #409eff;
+  --el-color-primary-light-3: #79bbff;
+  --el-color-primary-light-5: #a6c9fd;
+  --el-color-primary-light-7: #d1e4ff;
+  --el-color-primary-light-8: #e5f1ff;
+  --el-color-primary-light-9: #f0f7ff;
+  --el-color-primary-dark-2: #337ecc;
+}
+
+[data-theme="dark"] {
+  --el-color-primary: #5b8ff9;
+  --el-color-primary-light-3: #7ba5fa;
+  --el-color-primary-light-5: #9cbcfb;
+  --el-color-primary-light-7: #bdd2fc;
+  --el-color-primary-light-8: #cee1fd;
+  --el-color-primary-light-9: #def0fe;
+  --el-color-primary-dark-2: #4872c7;
+  
+  --el-bg-color: #141414;
+  --el-bg-color-page: #0a0a0a;
+  --el-bg-color-overlay: #1d1d1d;
+  --el-text-color-primary: #e0e0e0;
+  --el-text-color-regular: #b0b0b0;
+  --el-text-color-secondary: #808080;
+  --el-text-color-placeholder: #606060;
+  --el-border-color: #434343;
+  --el-border-color-light: #303030;
+  --el-border-color-lighter: #262626;
+  --el-fill-color: #262626;
+  --el-fill-color-light: #1d1d1d;
+  --el-fill-color-lighter: #141414;
+  --el-mask-color: rgba(0, 0, 0, 0.8);
+}

@@ -50,3 +50,6 @@ frontend/.eslintcache
 frontend/*.tsbuildinfo
 frontend/*.timestamp-*-*.mjs
 
+# Copied static files for Go embed
+cmd/server/static/
+

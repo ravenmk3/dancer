@@ -95,6 +95,9 @@ func main() {
 	// 初始化路由
 	e := router.New(userHandler, zoneHandler, domainHandler, healthHandler)
 
+	// 注册静态文件路由（嵌入的前端文件）
+	registerStaticRoutes(e)
+
 	// 启动服务器
 	go func() {
 		addr := fmt.Sprintf("%s:%d", cfg.App.Host, cfg.App.Port)
