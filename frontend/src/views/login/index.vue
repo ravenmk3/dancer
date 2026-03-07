@@ -88,7 +88,7 @@ const handleLogin = async () => {
     <div class="login-box">
       <div class="login-header">
         <div class="logo">D</div>
-        <h1 class="title">Dancer DNS</h1>
+        <h1 class="title">Dancer</h1>
         <p class="subtitle">DNS 管理系统</p>
       </div>
       
