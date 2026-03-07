@@ -39,3 +39,14 @@ config.toml
 # Temporary
 tmp/
 temp/
+
+# Frontend build output
+static/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/coverage/
+frontend/.eslintcache
+frontend/*.tsbuildinfo
+frontend/*.timestamp-*-*.mjs
+
