@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
@@ -34,12 +34,47 @@ const handleLogin = async () => {
     if (!valid) return
     
     loading.value = true
+    console.log('[Login] ========== Login Process Started ==========')
+    
     try {
-      await authStore.login(loginForm)
+      // 1. 执行登录
+      console.log('[Login] Step 1: Calling authStore.login()')
+      const loginResult = await authStore.login(loginForm)
+      console.log('[Login] Step 1 Complete: loginResult =', loginResult)
+      
+      // 2. 等待 DOM 更新，确保 computed 属性已更新
+      console.log('[Login] Step 2: Waiting for nextTick...')
+      await nextTick()
+      console.log('[Login] Step 2 Complete: nextTick done')
+      
+      // 3. 验证登录状态
+      console.log('[Login] Step 3: Checking auth state...')
+      console.log('[Login] - authStore.token exists:', !!authStore.token)
+      console.log('[Login] - authStore.userInfo exists:', !!authStore.userInfo)
+      console.log('[Login] - authStore.isLoggedIn:', authStore.isLoggedIn)
+      
+      if (!authStore.isLoggedIn) {
+        throw new Error('登录状态验证失败：isLoggedIn 为 false')
+      }
+      
+      // 4. 显示成功消息
+      console.log('[Login] Step 4: Showing success message')
       ElMessage.success('登录成功')
-      router.push('/')
-    } catch (error) {
-      // Error is handled by request interceptor
+      
+      // 5. 导航到首页 - 使用 push 而不是 replace
+      console.log('[Login] Step 5: Navigating to /dashboard')
+      await router.push('/dashboard')
+      console.log('[Login] ========== Login Process Complete ==========')
+      
+    } catch (error: any) {
+      console.error('[Login] ========== Login Failed ==========')
+      console.error('[Login] Error:', error)
+      console.error('[Login] Error message:', error?.message)
+      console.error('[Login] Error response:', error?.response?.data)
+      
+      // 显示具体错误信息
+      const errorMessage = error?.response?.data?.message || error?.message || '登录失败'
+      ElMessage.error(errorMessage)
     } finally {
       loading.value = false
     }
