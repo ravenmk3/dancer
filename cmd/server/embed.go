@@ -4,7 +4,10 @@ import (
 	"embed"
 	"io"
 	"io/fs"
+	"mime"
 	"net/http"
+	"path/filepath"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,6 +18,51 @@ var staticFiles embed.FS
 // getStaticFS returns the static file system
 func getStaticFS() (fs.FS, error) {
 	return fs.Sub(staticFiles, "static")
+}
+
+// getContentType returns the MIME type based on file extension
+func getContentType(filename string) string {
+	ext := strings.ToLower(filepath.Ext(filename))
+	
+	switch ext {
+	case ".js":
+		return "application/javascript"
+	case ".mjs":
+		return "application/javascript"
+	case ".css":
+		return "text/css"
+	case ".html":
+		return "text/html"
+	case ".json":
+		return "application/json"
+	case ".png":
+		return "image/png"
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".gif":
+		return "image/gif"
+	case ".svg":
+		return "image/svg+xml"
+	case ".ico":
+		return "image/x-icon"
+	case ".woff":
+		return "font/woff"
+	case ".woff2":
+		return "font/woff2"
+	case ".ttf":
+		return "font/ttf"
+	case ".eot":
+		return "application/vnd.ms-fontobject"
+	case ".otf":
+		return "font/otf"
+	default:
+		// Fallback to mime package
+		contentType := mime.TypeByExtension(ext)
+		if contentType == "" {
+			contentType = "application/octet-stream"
+		}
+		return contentType
+	}
 }
 
 // registerStaticRoutes registers static file routes
@@ -59,8 +107,8 @@ func registerStaticRoutes(e *echo.Echo) {
 			return serveIndexHTML(c, staticFS)
 		}
 
-		// Set content type
-		contentType := http.DetectContentType(content)
+		// Set content type based on file extension
+		contentType := getContentType(cleanPath)
 		return c.Blob(http.StatusOK, contentType, content)
 	})
 }

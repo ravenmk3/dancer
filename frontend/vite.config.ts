@@ -36,7 +36,7 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: '../static',
+    outDir: '../cmd/server/static',
     assetsDir: 'assets',
     rollupOptions: {
       output: {

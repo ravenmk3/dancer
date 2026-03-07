@@ -40,8 +40,8 @@ config.toml
 tmp/
 temp/
 
-# Frontend build output
-static/
+# Frontend build output (directly embedded in Go binary)
+cmd/server/static/
 frontend/node_modules/
 frontend/dist/
 frontend/dist-ssr/
@@ -49,7 +49,4 @@ frontend/coverage/
 frontend/.eslintcache
 frontend/*.tsbuildinfo
 frontend/*.timestamp-*-*.mjs
-
-# Copied static files for Go embed
-cmd/server/static/
 
