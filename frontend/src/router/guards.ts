@@ -1,18 +1,14 @@
-import type { Router, RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
+import type { Router, RouteLocationNormalized } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useTabsStore } from '@/stores/tabs'
 
 export function setupRouterGuard(router: Router) {
   // Before each guard
-  router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+  router.beforeEach(async (to: RouteLocationNormalized) => {
     const authStore = useAuthStore()
     const tabsStore = useTabsStore()
 
     console.log('[RouterGuard] Navigating to:', to.path)
-    console.log('[RouterGuard] From:', from.path)
-    console.log('[RouterGuard] isLoggedIn:', authStore.isLoggedIn)
-    console.log('[RouterGuard] Token exists:', !!authStore.token)
-    console.log('[RouterGuard] UserInfo exists:', !!authStore.userInfo)
 
     // Check if route requires authentication
     if (to.meta?.requiresAuth) {
@@ -29,21 +25,18 @@ export function setupRouterGuard(router: Router) {
             console.log('[RouterGuard] User info restored')
           } catch (error) {
             console.error('[RouterGuard] Failed to get user info:', error)
-            next('/login')
-            return
+            return '/login'
           }
         } else {
           console.log('[RouterGuard] No token, redirecting to login')
-          next('/login')
-          return
+          return '/login'
         }
       }
 
       // Check permission
       if (to.meta?.permission === 'admin' && !authStore.isAdmin) {
         console.log('[RouterGuard] Admin permission required, redirecting to 403')
-        next('/403')
-        return
+        return '/403'
       }
     }
 
@@ -56,7 +49,7 @@ export function setupRouterGuard(router: Router) {
     tabsStore.addTab(to)
 
     console.log('[RouterGuard] Navigation allowed to:', to.path)
-    next()
+    return true
   })
 
   // After each hook

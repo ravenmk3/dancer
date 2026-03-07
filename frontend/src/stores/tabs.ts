@@ -95,7 +95,10 @@ export const useTabsStore = defineStore('tabs', () => {
     // Activate adjacent tab if removing active tab
     if (isActive && tabs.value.length > 0) {
       const newIndex = Math.min(index, tabs.value.length - 1)
-      activeTab.value = tabs.value[newIndex].id
+      const nextTab = tabs.value[newIndex]
+      if (nextTab) {
+        activeTab.value = nextTab.id
+      }
     }
   }
 
@@ -112,7 +115,10 @@ export const useTabsStore = defineStore('tabs', () => {
     // Only keep fixed tabs
     tabs.value = tabs.value.filter(tab => tab.fixed)
     if (tabs.value.length > 0) {
-      activeTab.value = tabs.value[0].id
+      const firstTab = tabs.value[0]
+      if (firstTab) {
+        activeTab.value = firstTab.id
+      }
     }
   }
 

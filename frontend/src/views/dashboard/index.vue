@@ -37,9 +37,9 @@ const fetchStats = async () => {
     domainCount.value = domainCountValue
     userCount.value = users.length
     
-    stats.value[0].value = zoneCount.value
-    stats.value[1].value = domainCount.value
-    stats.value[2].value = userCount.value
+    stats.value[0]!.value = zoneCount.value
+    stats.value[1]!.value = domainCount.value
+    stats.value[2]!.value = userCount.value
   } finally {
     loading.value = false
   }

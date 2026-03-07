@@ -87,8 +87,11 @@ const fetchZones = async () => {
     const res = await getZoneListApi()
     zones.value = res.zones || []
     if (zones.value.length > 0 && !selectedZone.value) {
-      selectedZone.value = zones.value[0].zone
-      fetchDomains()
+      const firstZone = zones.value[0]
+      if (firstZone) {
+        selectedZone.value = firstZone.zone
+        fetchDomains()
+      }
     }
   } catch (error) {
     console.error(error)

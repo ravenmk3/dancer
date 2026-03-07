@@ -70,7 +70,7 @@ const isMenuActive = (menu: MenuItem): boolean => {
   <div class="sidebar" :class="{ collapsed: isCollapse }">
     <div class="logo">
       <div class="logo-icon">D</div>
-      <span v-if="!isCollapse" class="logo-text">Dancer DNS</span>
+      <span v-if="!isCollapse" class="logo-text">Dancer</span>
     </div>
     
     <el-scrollbar class="menu-scrollbar">
