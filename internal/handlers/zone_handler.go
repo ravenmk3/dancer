@@ -101,6 +101,10 @@ func (h *ZoneHandler) CreateZone(c echo.Context) error {
 }
 
 // UpdateZone 更新 Zone
+//
+// 注意: 当前 Zone 实体只包含 zone 名称和统计字段。
+// 此方法主要用于刷新 Zone 的 updated_at 时间戳。
+// 未来可扩展支持更新其他元数据（如描述、标签等）。
 func (h *ZoneHandler) UpdateZone(c echo.Context) error {
 	var req models.UpdateZoneRequest
 	if err := c.Bind(&req); err != nil {

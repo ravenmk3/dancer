@@ -277,7 +277,7 @@ Content-Type: application/json
 ```json
 {
   "code": "success",
-  "message": "success",
+  "message": "user created successfully",
   "data": {
     "id": "user-uuid",
     "username": "newuser",
@@ -501,6 +501,10 @@ Content-Type: application/json
 ---
 
 #### 12. 更新 Zone
+
+> **注意**: 当前 Zone 实体只包含 zone 名称和统计字段（record_count、created_at、updated_at）。
+> 此方法主要用于刷新 Zone 的 `updated_at` 时间戳。
+> 未来可扩展支持更新其他元数据（如描述、标签等）。
 
 **请求**
 

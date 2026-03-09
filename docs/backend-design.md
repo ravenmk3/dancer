@@ -186,7 +186,7 @@ POST   /api/user/delete             # 删除用户
 POST   /api/dns/zones/list          # 列举所有 Zone
 POST   /api/dns/zones/get           # 获取 Zone 详情
 POST   /api/dns/zones/create        # 创建 Zone
-POST   /api/dns/zones/update        # 更新 Zone
+POST   /api/dns/zones/update        # 更新 Zone（当前仅刷新 updated_at 时间戳）
 POST   /api/dns/zones/delete        # 删除 Zone（级联删除）
 
 # Domain 管理 (JWT 认证)
