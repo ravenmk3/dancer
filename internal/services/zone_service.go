@@ -82,17 +82,18 @@ func (s *ZoneService) UpdateZone(ctx context.Context, req *models.UpdateZoneRequ
 	return zone, nil
 }
 
-// DeleteZone 删除 Zone（级联删除所有 Domain）
+// DeleteZone 删除 Zone（级联删除所有 Domain 及 CoreDNS 记录）
 func (s *ZoneService) DeleteZone(ctx context.Context, req *models.DeleteZoneRequest) error {
-	// 转换为小写
 	req.Zone = strings.ToLower(req.Zone)
 
-	// 检查是否存在
 	_, err := s.zoneStorage.GetZone(ctx, req.Zone)
 	if err != nil {
 		return err
 	}
 
-	// 删除 Zone 及所有 Domain
-	return s.zoneStorage.DeleteZone(ctx, req.Zone)
+	if err := s.domainStorage.DeleteDomainsByZone(ctx, req.Zone); err != nil {
+		return err
+	}
+
+	return s.zoneStorage.DeleteZoneMetadata(ctx, req.Zone)
 }

@@ -98,27 +98,15 @@ func (s *ZoneStorage) UpdateZone(ctx context.Context, zone *models.Zone) error {
 	return err
 }
 
-// DeleteZone 删除 Zone（级联删除该 Zone 下所有 Domain）
-func (s *ZoneStorage) DeleteZone(ctx context.Context, zone string) error {
+// DeleteZoneMetadata 仅删除 Zone 元数据（不删除关联的 Domain）
+func (s *ZoneStorage) DeleteZoneMetadata(ctx context.Context, zone string) error {
 	if err := s.client.WaitForConnection(defaultWaitTimeout); err != nil {
 		return errors.ErrEtcdUnavailable
 	}
 
-	// 删除 Zone 本身
 	key := s.zoneKey(zone)
 	_, err := s.client.client.Delete(ctx, key)
-	if err != nil {
-		return err
-	}
-
-	// 级联删除该 Zone 下的所有 Domain
-	domainPrefix := storage.DomainKeyPrefix + zone + "/"
-	_, err = s.client.client.Delete(ctx, domainPrefix, clientv3.WithPrefix())
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // zoneKey 生成 Zone 的 etcd key
