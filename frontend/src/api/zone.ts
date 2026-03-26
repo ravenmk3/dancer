@@ -6,15 +6,15 @@ export const getZoneListApi = () => {
 }
 
 export const getZoneApi = (zone: string) => {
-  return request.post<{ zone: Zone }>('/dns/zones/get', { zone })
+  return request.post<Zone>('/dns/zones/get', { zone })
 }
 
 export const createZoneApi = (data: CreateZoneForm) => {
-  return request.post<{ zone: Zone }>('/dns/zones/create', data)
+  return request.post<Zone>('/dns/zones/create', data)
 }
 
 export const updateZoneApi = (zone: string) => {
-  return request.post<{ zone: Zone }>('/dns/zones/update', { zone })
+  return request.post<Zone>('/dns/zones/update', { zone })
 }
 
 export const deleteZoneApi = (zone: string) => {

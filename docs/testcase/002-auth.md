@@ -40,19 +40,11 @@
   "code": "success",
   "message": "success",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": {
-      "id": "user-uuid",
-      "username": "testuser",
-      "user_type": "normal",
-      "created_at": 1704067200,
-      "updated_at": 1704067200
-    }
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   }
 }
 ```
 - Token 格式为有效的 JWT
-- 用户信息包含所有必需字段
 
 ---
 

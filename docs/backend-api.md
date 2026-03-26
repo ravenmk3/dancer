@@ -438,12 +438,10 @@ Content-Type: application/json
   "code": "success",
   "message": "success",
   "data": {
-    "zone": {
-      "zone": "example.com",
-      "record_count": 5,
-      "created_at": 1704067200,
-      "updated_at": 1704067200
-    }
+    "zone": "example.com",
+    "record_count": 5,
+    "created_at": 1704067200,
+    "updated_at": 1704067200
   }
 }
 ```
@@ -479,14 +477,12 @@ Content-Type: application/json
 ```json
 {
   "code": "success",
-  "message": "success",
+  "message": "Zone created successfully",
   "data": {
-    "zone": {
-      "zone": "example.com",
-      "record_count": 0,
-      "created_at": 1704067200,
-      "updated_at": 1704067200
-    }
+    "zone": "example.com",
+    "record_count": 0,
+    "created_at": 1704067200,
+    "updated_at": 1704067200
   }
 }
 ```
@@ -523,14 +519,12 @@ Content-Type: application/json
 ```json
 {
   "code": "success",
-  "message": "success",
+  "message": "Zone updated successfully",
   "data": {
-    "zone": {
-      "zone": "example.com",
-      "record_count": 5,
-      "created_at": 1704067200,
-      "updated_at": 1704153600
-    }
+    "zone": "example.com",
+    "record_count": 5,
+    "created_at": 1704067200,
+    "updated_at": 1704153600
   }
 }
 ```
@@ -659,16 +653,14 @@ Content-Type: application/json
   "code": "success",
   "message": "success",
   "data": {
-    "domain": {
-      "zone": "example.com",
-      "domain": "www",
-      "name": "www.example.com",
-      "ips": ["192.168.1.1", "192.168.1.2"],
-      "ttl": 300,
-      "record_count": 2,
-      "created_at": 1704067200,
-      "updated_at": 1704067200
-    }
+    "zone": "example.com",
+    "domain": "www",
+    "name": "www.example.com",
+    "ips": ["192.168.1.1", "192.168.1.2"],
+    "ttl": 300,
+    "record_count": 2,
+    "created_at": 1704067200,
+    "updated_at": 1704067200
   }
 }
 ```
@@ -710,18 +702,16 @@ Content-Type: application/json
 ```json
 {
   "code": "success",
-  "message": "success",
+  "message": "Domain created successfully",
   "data": {
-    "domain": {
-      "zone": "example.com",
-      "domain": "www",
-      "name": "www.example.com",
-      "ips": ["192.168.1.1", "192.168.1.2"],
-      "ttl": 300,
-      "record_count": 2,
-      "created_at": 1704067200,
-      "updated_at": 1704067200
-    }
+    "zone": "example.com",
+    "domain": "www",
+    "name": "www.example.com",
+    "ips": ["192.168.1.1", "192.168.1.2"],
+    "ttl": 300,
+    "record_count": 2,
+    "created_at": 1704067200,
+    "updated_at": 1704067200
   }
 }
 ```
@@ -768,18 +758,16 @@ Content-Type: application/json
 ```json
 {
   "code": "success",
-  "message": "success",
+  "message": "Domain updated successfully",
   "data": {
-    "domain": {
-      "zone": "example.com",
-      "domain": "www",
-      "name": "www.example.com",
-      "ips": ["192.168.1.3", "192.168.1.4"],
-      "ttl": 600,
-      "record_count": 2,
-      "created_at": 1704067200,
-      "updated_at": 1704153600
-    }
+    "zone": "example.com",
+    "domain": "www",
+    "name": "www.example.com",
+    "ips": ["192.168.1.3", "192.168.1.4"],
+    "ttl": 600,
+    "record_count": 2,
+    "created_at": 1704067200,
+    "updated_at": 1704153600
   }
 }
 ```

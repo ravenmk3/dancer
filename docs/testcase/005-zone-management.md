@@ -157,12 +157,10 @@ Content-Type: application/json
   "code": "success",
   "message": "success",
   "data": {
-    "zone": {
-      "zone": "example.com",
-      "record_count": 5,
-      "created_at": 1704067200,
-      "updated_at": 1704067200
-    }
+    "zone": "example.com",
+    "record_count": 5,
+    "created_at": 1704067200,
+    "updated_at": 1704067200
   }
 }
 ```
@@ -305,14 +303,12 @@ Content-Type: application/json
 ```json
 {
   "code": "success",
-  "message": "success",
+  "message": "Zone created successfully",
   "data": {
-    "zone": {
-      "zone": "newzone.com",
-      "record_count": 0,
-      "created_at": 1704067200,
-      "updated_at": 1704067200
-    }
+    "zone": "newzone.com",
+    "record_count": 0,
+    "created_at": 1704067200,
+    "updated_at": 1704067200
   }
 }
 ```
@@ -695,14 +691,12 @@ Content-Type: application/json
 ```json
 {
   "code": "success",
-  "message": "success",
+  "message": "Zone updated successfully",
   "data": {
-    "zone": {
-      "zone": "updatezone.com",
-      "record_count": 5,
-      "created_at": 1704067200,
-      "updated_at": 1704153600
-    }
+    "zone": "updatezone.com",
+    "record_count": 5,
+    "created_at": 1704067200,
+    "updated_at": 1704153600
   }
 }
 ```

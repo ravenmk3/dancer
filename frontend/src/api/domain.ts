@@ -6,15 +6,15 @@ export const getDomainListApi = (zone: string) => {
 }
 
 export const getDomainApi = (zone: string, domain: string) => {
-  return request.post<{ domain: Domain }>('/dns/domains/get', { zone, domain })
+  return request.post<Domain>('/dns/domains/get', { zone, domain })
 }
 
 export const createDomainApi = (data: CreateDomainForm) => {
-  return request.post<{ domain: Domain }>('/dns/domains/create', data)
+  return request.post<Domain>('/dns/domains/create', data)
 }
 
 export const updateDomainApi = (data: CreateDomainForm) => {
-  return request.post<{ domain: Domain }>('/dns/domains/update', data)
+  return request.post<Domain>('/dns/domains/update', data)
 }
 
 export const deleteDomainApi = (zone: string, domain: string) => {
